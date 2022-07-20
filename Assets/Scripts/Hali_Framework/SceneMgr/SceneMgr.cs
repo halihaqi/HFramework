@@ -12,6 +12,9 @@ public class SceneMgr : Singleton<SceneMgr>
     /// <param name="name">场景名</param>
     public void LoadScene(string name)
     {
+        //切换下一个场景前，清空对象池和资源字典，释放空间
+        //对象池如果不清空会导致字典中有对象但场景中被销毁
+        ResMgr.Instance.ClearResDic();
         PoolMgr.Instance.Clear();
         SceneManager.LoadScene(name);
         EventCenter.Instance.Clear();
@@ -26,7 +29,7 @@ public class SceneMgr : Singleton<SceneMgr>
     /// <param name="action">完成回调函数</param>
     public void LoadSceneAsync(string name, UnityAction callback)
     {
-        //加载场景前要清空对象池字典，否则会出错
+        ResMgr.Instance.ClearResDic();
         PoolMgr.Instance.Clear();
         MonoMgr.Instance.StartCoroutine(AsyncLoad(name, callback));
     }
@@ -45,6 +48,7 @@ public class SceneMgr : Singleton<SceneMgr>
         UIMgr.Instance.ShowPanel<T>(panelName, E_UI_Layer.System, (panel) =>
         {
             //显示完后开始切换场景
+            ResMgr.Instance.ClearResDic();
             PoolMgr.Instance.Clear();
             MonoMgr.Instance.StartCoroutine(AsyncLoad<T>(name, panelName, callback));
         });
@@ -59,6 +63,8 @@ public class SceneMgr : Singleton<SceneMgr>
             yield return ao.progress;
             EventCenter.Instance.PostEvent("Loading");
         }
+        //等一帧，为界面更新提供时机
+        yield return null;
         EventCenter.Instance.PostEvent("LoadComplete");
         action?.Invoke();
     }
@@ -96,9 +102,10 @@ public class SceneMgr : Singleton<SceneMgr>
             EventCenter.Instance.PostEvent("Loading", toProgress);
             yield return toProgress;
         }
-        //这里间隔一帧可以去掉
-        yield return toProgress;
         toProgress = 100;
+        EventCenter.Instance.PostEvent("Loading", toProgress);
+        //等一帧，为界面更新提供时机
+        yield return null;
         callback?.Invoke();
         UIMgr.Instance.HidePanel(panelName);
         EventCenter.Instance.PostEvent("LoadComplete");

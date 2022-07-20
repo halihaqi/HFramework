@@ -5,6 +5,19 @@ using UnityEngine.Events;
 
 public class ResMgr : Singleton<ResMgr>
 {
+    //资源容器
+    //优点：避免重复加载，提升加载效率
+    //缺点：内存占用，需要在合适时机释放
+    private Dictionary<string, object> resDic = new Dictionary<string, object>();
+
+    /// <summary>
+    /// 清空资源容器，释放内存
+    /// </summary>
+    public void ClearResDic()
+    {
+        resDic.Clear();
+    }
+
     /// <summary>
     /// 加载资源(同步)
     /// </summary>
@@ -13,7 +26,12 @@ public class ResMgr : Singleton<ResMgr>
     /// <returns></returns>
     public T Load<T>(string path) where T : Object
     {
-        T res = Resources.Load<T>(path);
+        T res = null;
+        //如果字典中有，就不用加载了
+        if (resDic.ContainsKey(path))
+            res = resDic[path] as T;
+        else
+            res = Resources.Load<T>(path);
         //如果是GameObject，先实例化再返回
         if (res is GameObject)
             return GameObject.Instantiate(res);
@@ -34,11 +52,20 @@ public class ResMgr : Singleton<ResMgr>
 
     IEnumerator AsyncLoad<T>(string path, UnityAction<T> callback) where T : Object
     {
-        ResourceRequest rr = Resources.LoadAsync<T>(path);
-        yield return rr;
-        if (rr.asset is GameObject)
-            callback?.Invoke(GameObject.Instantiate(rr.asset) as T);
+        T res = null;
+        //如果字典中有，就不用加载了
+        if (resDic.ContainsKey(path))
+            res = resDic[path] as T;
         else
-            callback?.Invoke(rr.asset as T);
+        {
+            ResourceRequest rr = Resources.LoadAsync<T>(path);
+            res = rr.asset as T;
+        }
+        yield return null;
+        //如果是GameObject，先生成预制体再执行回调
+        if (res is GameObject)
+            callback?.Invoke(GameObject.Instantiate(res));
+        else
+            callback?.Invoke(res);
     }
 }
