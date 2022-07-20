@@ -20,6 +20,7 @@ public class SceneMgr : Singleton<SceneMgr>
     /// <summary>
     /// 加载场景(异步)
     /// 加载过程中会分发事件"Loading"
+    /// 加载结束会分发无参事件"LoadComplete"
     /// </summary>
     /// <param name="name">场景名</param>
     /// <param name="action">完成回调函数</param>
@@ -31,19 +32,25 @@ public class SceneMgr : Singleton<SceneMgr>
     }
 
     /// <summary>
-    /// 加载场景(异步Pro)
-    /// 先显示加载面板，再加载
-    /// 加载完成后等待waitTime才隐藏加载面板
+    /// 加载场景(显示LoadingUI界面)
+    /// 加载过程中会分发有参事件"Loading",参数为加载进度
+    /// 加载结束会分发无参事件"LoadComplete"，会自动隐藏加载面板
     /// </summary>
     /// <param name="name">场景名</param>
+    /// <param name="panelName">加载界面Panel预设体名</param>
     /// <param name="callback">加载完成的回调</param>
-    /// <param name="waitTime">加载完成后加载面板延迟消失的时间</param>
-    public void LoadSceneAsyncPro(string name, UnityAction callback, float waitTime = 0.5f)
+    public void LoadSceneAsync<T>(string name, string panelName, UnityAction callback) where T : BasePanel
     {
-
+        //先显示LoadingUI
+        UIMgr.Instance.ShowPanel<T>(panelName, E_UI_Layer.System, (panel) =>
+        {
+            //显示完后开始切换场景
+            PoolMgr.Instance.Clear();
+            MonoMgr.Instance.StartCoroutine(AsyncLoad<T>(name, panelName, callback));
+        });
     }
 
-
+    //异步加载场景协程
     IEnumerator AsyncLoad(string name,UnityAction action)
     {
         AsyncOperation ao = SceneManager.LoadSceneAsync(name);
@@ -56,32 +63,44 @@ public class SceneMgr : Singleton<SceneMgr>
         action?.Invoke();
     }
 
-    IEnumerator AsyncLoadPro(string name, UnityAction callback, float waitTime)
+    //异步加载场景协程(有UI遮挡)
+    IEnumerator AsyncLoad<T>(string name, string panelName, UnityAction callback) where T : BasePanel
     {
+        //申明toProgress表示假的加载进度
+        //因为ao.progress在加载小场景时变化太快，效果不好
         int toProgress = 0;
         AsyncOperation ao = SceneManager.LoadSceneAsync(name);
-        //加载到0.9就加载完了
         ao.allowSceneActivation = false;
-        yield return new WaitForEndOfFrame();
+
+        //在allowSceneActivation = true之前progress只会加载到0.9
+        //需要手动设置
         while (ao.progress < 0.9f)
         {
-            toProgress = (int)(ao.progress * 100);
-            EventCenter.Instance.PostEvent("Loading", toProgress);
-            yield return new WaitForEndOfFrame();
+            //这里表示的假的进度变化，如果小于ao.progres，每帧加1
+            while (toProgress < (int)(ao.progress * 100))
+            {
+                toProgress++;
+                EventCenter.Instance.PostEvent("Loading", toProgress);
+                yield return toProgress;
+            }
         }
-        yield return new WaitForEndOfFrame();
+        //加载到0.9后手动设置为true
+        //会继续加载0.9~1的资源并开启场景
+        //此时还不应该显示场景
         ao.allowSceneActivation = true;
+        //isDone只有在allowSceneActivation为true并且加载完后才为true
+        //可以通过这个判断是否加载完成
         while (!ao.isDone)
-            yield return new WaitForEndOfFrame();
-        callback?.Invoke();
-        //这里是为了延迟隐藏Loading面板
-        yield return new WaitForSeconds(waitTime);
-        while (toProgress < 100)
         {
-            toProgress++;
+            toProgress = 95;
             EventCenter.Instance.PostEvent("Loading", toProgress);
-            yield return new WaitForEndOfFrame();
+            yield return toProgress;
         }
+        //这里间隔一帧可以去掉
+        yield return toProgress;
+        toProgress = 100;
+        callback?.Invoke();
+        UIMgr.Instance.HidePanel(panelName);
         EventCenter.Instance.PostEvent("LoadComplete");
     }
 }

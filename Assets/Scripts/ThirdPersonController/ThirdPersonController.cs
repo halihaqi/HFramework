@@ -67,7 +67,6 @@ public class ThirdPersonController : MonoBehaviour
     {
         //πÿ±’ ‰»Îº‡Ã˝
         InputMgr.Instance.OpenOrClose(false);
-        EventCenter.Instance.RemoveListener<KeyCode>("GetKeyDown", inputEvent);
     }
 
     protected virtual void Update()

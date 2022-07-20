@@ -90,25 +90,17 @@ public class UIMgr : Singleton<UIMgr>
 
     /// <summary>
     /// 隐藏面板,先执行HideMe
-    /// 若isFade为true，则在渐变结束后销毁面板
     /// </summary>
     /// <param name="panelName">面板名</param>
-    /// /// <param name="isFade">是否渐变隐藏,默认渐变</param>
-    public void HidePanel(string panelName, bool isFade = true)
+    public void HidePanel(string panelName)
     {
         if (panelDic.ContainsKey(panelName))
         {
-            if (isFade)
-            {
-                panelDic[panelName].HideMe(true, true);
-                panelDic.Remove(panelName);
-            }
-            else
-            {
-                panelDic[panelName].HideMe();
-                GameObject.Destroy(panelDic[panelName].gameObject);
-                panelDic.Remove(panelName);
-            }
+            panelDic[panelName].HideMe();
+            //这里防止面板延时隐藏期间被其他脚本调用
+            panelDic[panelName].enabled = false;
+            GameObject.Destroy(panelDic[panelName].gameObject, 0.5f);
+            panelDic.Remove(panelName);
         }
         else
         {

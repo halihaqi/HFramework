@@ -108,18 +108,25 @@ public abstract class BasePanel : MonoBehaviour
     public virtual void ShowMe(bool isFade = true)
     {
         if (isFade)
+        {
+            StopAllCoroutines();
             StartCoroutine(FadeInOut(true));
+        }
+
     }
 
     /// <summary>
     /// 面板隐藏时调用
     /// </summary>
     /// <param name="isFade">是否开启渐变</param>
-    /// <param name="isUIMgr">UIMgr内部调用，请勿修改</param>
-    public virtual void HideMe(bool isFade = true, bool isUIMgr = false)
+    public virtual void HideMe(bool isFade = true)
     {
         if (isFade)
-            StartCoroutine(FadeInOut(false, isUIMgr));
+        {
+            StopAllCoroutines();
+            StartCoroutine(FadeInOut(false));
+        }
+
     }
 
     protected virtual void OnClick(string btnName)
@@ -148,7 +155,7 @@ public abstract class BasePanel : MonoBehaviour
     /// </summary>
     /// <param name="isIn">是否显示</param>
     /// <returns></returns>
-    IEnumerator FadeInOut(bool isIn, bool isUIMgr = false)
+    IEnumerator FadeInOut(bool isIn)
     {
         CanvasGroup canvasGroup = this.GetComponent<CanvasGroup>();
         if (isIn)
@@ -168,8 +175,6 @@ public abstract class BasePanel : MonoBehaviour
                 canvasGroup.alpha -= fadeSpeed;
                 yield return null;
             }
-            if (isUIMgr)
-                Destroy(gameObject);
         }
     }
 }
