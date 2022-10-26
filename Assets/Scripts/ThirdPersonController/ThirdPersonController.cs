@@ -16,8 +16,8 @@ public class ThirdPersonController : MonoBehaviour
     public float gravity = -15;
 
     [Header("FollowCamera")]
-    public float topClamp = 70;//Ïà»ú×î´óÑö½Ç
-    public float bottomClamp = -30;//Ïà»ú×î´ó¸©½Ç
+    public float topClamp = 70;//ç›¸æœºæœ€å¤§ä»°è§’
+    public float bottomClamp = -30;//ç›¸æœºæœ€å¤§ä¿¯è§’
     public bool isFilpPitch = true;
 
     [Header("GroundCheck")]
@@ -26,24 +26,24 @@ public class ThirdPersonController : MonoBehaviour
     public float groundRadius = 0.28f;
     public LayerMask groundLayers = 1;
 
-    //ÊäÈë²ÎÊı
+    //è¾“å…¥å‚æ•°
     private Vector2 _inputLook;
     private Vector2 _inputMove;
-    private float _threshold = 0.01f;//ÊäÈë×îµÍÃÅ¼÷
+    private float _threshold = 0.01f;//è¾“å…¥æœ€ä½é—¨æ§›
 
-    //ÒÆ¶¯²ÎÊı
+    //ç§»åŠ¨å‚æ•°
     private float _targetRot = 0;
     private float _rotVelocity;
     private float _verticalVelocity;
     private float _terminalVelocity = 53;
 
-    //Ïà»ú²ÎÊı
+    //ç›¸æœºå‚æ•°
     private Camera followCamera;
     private Transform followTarget;
     private float _camTargetYaw;
     private float _camTargetPitch;
 
-    //ÊäÈëÊÂ¼ş¼àÌı
+    //è¾“å…¥äº‹ä»¶ç›‘å¬
     protected UnityAction<KeyCode> inputEvent;
 
     //Component
@@ -52,20 +52,20 @@ public class ThirdPersonController : MonoBehaviour
 
     protected virtual void Awake()
     {
-        //»ñÈ¡×é¼ş
+        //è·å–ç»„ä»¶
         //anim = GetComponent<Animator>();
         cc = GetComponent<CharacterController>();
-        //ÕÒµ½Ïà»ú¸úËæµã
+        //æ‰¾åˆ°ç›¸æœºè·Ÿéšç‚¹
         followTarget = transform.Find("FollowPos");
         followCamera = Camera.main;
         followCamera.GetComponent<ThirdPersonCam>().followTarget = followTarget;
-        //´ò¿ªÊäÈë¼àÌı
+        //æ‰“å¼€è¾“å…¥ç›‘å¬
         InputMgr.Instance.OpenOrClose(true);
     }
 
     protected virtual void OnDestroy()
     {
-        //¹Ø±ÕÊäÈë¼àÌı
+        //å…³é—­è¾“å…¥ç›‘å¬
         InputMgr.Instance.OpenOrClose(false);
     }
 
@@ -79,7 +79,7 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     /// <summary>
-    /// ¸üĞÂÊäÈë²ÎÊı
+    /// æ›´æ–°è¾“å…¥å‚æ•°
     /// </summary>
     private void UpdateInput()
     {
@@ -88,21 +88,21 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     /// <summary>
-    /// ÒÆ¶¯ºÍ×ªÉí
+    /// ç§»åŠ¨å’Œè½¬èº«
     /// </summary>
     private void Move()
     {
-        //ÅĞ¶ÏÊÇ·ñÎª³å´ÌËÙ¶È
+        //åˆ¤æ–­æ˜¯å¦ä¸ºå†²åˆºé€Ÿåº¦
         float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
 
-        //ÅĞ¶ÏÒÆ¶¯ÊäÈëÊÇ·ñÎª0
+        //åˆ¤æ–­ç§»åŠ¨è¾“å…¥æ˜¯å¦ä¸º0
         if (_inputMove == Vector2.zero)
             targetSpeed = 0;
 
-        //ÊäÈëµÄ·½Ïò
+        //è¾“å…¥çš„æ–¹å‘
         Vector3 inputDir = new Vector3(_inputMove.x, 0, _inputMove.y);
 
-        //ÈËÎïÒÆ¶¯Ê±µÄ°ËÏòĞı×ª
+        //äººç‰©ç§»åŠ¨æ—¶çš„å…«å‘æ—‹è½¬
         if(_inputMove != Vector2.zero)
         {
             _targetRot = Mathf.Atan2(inputDir.x, inputDir.z) * Mathf.Rad2Deg + followCamera.transform.eulerAngles.y;
@@ -111,18 +111,18 @@ public class ThirdPersonController : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, rot, 0);
         }
 
-        //Ğı×ªºóµÄÒÆ¶¯·½Ïò
+        //æ—‹è½¬åçš„ç§»åŠ¨æ–¹å‘
         Vector3 targetDir = Quaternion.Euler(0, _targetRot, 0) * Vector3.forward;
 
-        //ÒÆ¶¯ÈËÎï,¼ÓÉÏ´¹Ö±ËÙ¶È
+        //ç§»åŠ¨äººç‰©,åŠ ä¸Šå‚ç›´é€Ÿåº¦
         cc.Move((targetDir.normalized + Vector3.up * _verticalVelocity) * targetSpeed * Time.deltaTime);
 
-        //ÒÆ¶¯¶¯»­
+        //ç§»åŠ¨åŠ¨ç”»
         //anim.SetFloat("Speed", Input.GetKey(KeyCode.LeftShift) ? inputDir.magnitude : inputDir.magnitude / 2);
     }
 
     /// <summary>
-    /// µØÃæ¼ì²â
+    /// åœ°é¢æ£€æµ‹
     /// </summary>
     private void GroundCheck()
     {
@@ -131,13 +131,13 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     /// <summary>
-    /// ÖØÁ¦
+    /// é‡åŠ›
     /// </summary>
     private void Gravity()
     {
         if (!isGrounded)
         {
-            //Èç¹ûÃ»ÓĞ´ïµ½´¹Ö±ËÙ¶ÈãĞÖµ£¬¾Í»áÒ»Ö±¼Ó´¹Ö±ËÙ¶È
+            //å¦‚æœæ²¡æœ‰è¾¾åˆ°å‚ç›´é€Ÿåº¦é˜ˆå€¼ï¼Œå°±ä¼šä¸€ç›´åŠ å‚ç›´é€Ÿåº¦
             if (_verticalVelocity < _terminalVelocity)
                 _verticalVelocity += gravity * Time.deltaTime;
         }
@@ -148,31 +148,31 @@ public class ThirdPersonController : MonoBehaviour
     }
 
     /// <summary>
-    /// µÚÈıÈË³ÆÏà»úĞı×ª
+    /// ç¬¬ä¸‰äººç§°ç›¸æœºæ—‹è½¬
     /// </summary>
     private void CameraTargetRotation()
     {
-        //Èç¹ûÊäÈë´óÓÚãĞÖµ
+        //å¦‚æœè¾“å…¥å¤§äºé˜ˆå€¼
         if (_inputLook.sqrMagnitude >= _threshold)
         {
             _camTargetYaw += _inputLook.x;
             _camTargetPitch += _inputLook.y * (isFilpPitch ? -1 : 1);
         }
-        //ÏŞÖÆÏà»ú½Ç¶È
+        //é™åˆ¶ç›¸æœºè§’åº¦
         _camTargetYaw = TransformTools.ClampAngle(_camTargetYaw, float.MinValue, float.MaxValue);
         _camTargetPitch = TransformTools.ClampAngle(_camTargetPitch, bottomClamp, topClamp);
-        //ÒÆ¶¯Ïà»úÄ¿±êµã
+        //ç§»åŠ¨ç›¸æœºç›®æ ‡ç‚¹
         followTarget.rotation = Quaternion.Euler(_camTargetPitch, _camTargetYaw, 0);
     }
 
     private void OnDrawGizmosSelected()
     {
-        //Èç¹ûÔÚµØÃæÎªÂÌÉ«£¬Èç¹û²»ÔÚÎªºìÉ«
+        //å¦‚æœåœ¨åœ°é¢ä¸ºç»¿è‰²ï¼Œå¦‚æœä¸åœ¨ä¸ºçº¢è‰²
         Color groundedColorGreen = new Color(0, 1, 0, 0.35f);
         Color airColorRed = new Color(1, 0, 0, 0.35f);
         Gizmos.color = isGrounded ? groundedColorGreen : airColorRed;
 
-        //»­Çò
+        //ç”»çƒ
         Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - groundOffset, transform.position.z);
         Gizmos.DrawSphere(spherePosition, groundRadius);
     }

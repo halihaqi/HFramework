@@ -5,7 +5,7 @@ using UnityEngine;
 public static class int_Expand
 {
     /// <summary>
-    /// ½«int×ª»»Îªtime¸ñÊ½×Ö·û´® 00:00:00
+    /// å°†intè½¬æ¢ä¸ºtimeæ ¼å¼å­—ç¬¦ä¸² 00:00:00
     /// </summary>
     /// <param name="i"></param>
     /// <returns></returns>

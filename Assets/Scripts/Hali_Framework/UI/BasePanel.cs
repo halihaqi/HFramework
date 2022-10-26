@@ -8,19 +8,15 @@ using UnityEngine.UI;
 [RequireComponent(typeof(CanvasGroup))]
 public abstract class BasePanel : MonoBehaviour
 {
-    //UI×é¼şÈİÆ÷£¬ÎïÌåÃû¶ÔÓ¦ÎïÌå¹ÒÔØµÄËùÓĞUI×é¼ş
+    //UIç»„ä»¶å®¹å™¨ï¼Œç‰©ä½“åå¯¹åº”ç‰©ä½“æŒ‚è½½çš„æ‰€æœ‰UIç»„ä»¶
     private Dictionary<string, List<UIBehaviour>> controlDic = new Dictionary<string, List<UIBehaviour>>();
 
-    //×Ô¶¨Òå´¥·¢ÊÂ¼ş£¬ÓÃÓÚEventCenter.Instance.RemoveListener
-    //Í¨¹ıÃüÃûÊÂ¼şÀ´É¾³ı
-    protected UnityAction customEvent;
-
-    //Ãæ°å½¥±äËÙ¶È(0,1)
+    //é¢æ¿æ¸å˜é€Ÿåº¦(0,1)
     private float fadeSpeed = 0.1f;
 
     protected virtual void Awake()
     {
-        //Ò»¿ªÊ¼ËÑË÷³£ÓÃUI×é¼şÌí¼Óµ½ÈİÆ÷ÖĞ
+        //ä¸€å¼€å§‹æœç´¢å¸¸ç”¨UIç»„ä»¶æ·»åŠ åˆ°å®¹å™¨ä¸­
         FindChildrenControls<Button>();
         FindChildrenControls<Image>();
         FindChildrenControls<Text>();
@@ -29,25 +25,25 @@ public abstract class BasePanel : MonoBehaviour
     }
 
     /// <summary>
-    /// ËÑË÷ËùÓĞ×ÓÎïÌåµÄÌØ¶¨UI×é¼ş²¢Ìí¼Ó½ø×ÖµäÈİÆ÷ÖĞ
+    /// æœç´¢æ‰€æœ‰å­ç‰©ä½“çš„ç‰¹å®šUIç»„ä»¶å¹¶æ·»åŠ è¿›å­—å…¸å®¹å™¨ä¸­
     /// </summary>
     /// <typeparam name="T"></typeparam>
     private void FindChildrenControls<T>() where T : UIBehaviour
     {
-        //ËÑË÷ËùÓĞ×ÓÎïÌåµÄ×é¼ş
+        //æœç´¢æ‰€æœ‰å­ç‰©ä½“çš„ç»„ä»¶
         T[] controls = this.GetComponentsInChildren<T>();
         for (int i = 0; i < controls.Length; i++)
         {
-            //×é¼şµÄÎïÌåÃû
+            //ç»„ä»¶çš„ç‰©ä½“å
             string objName = controls[i].gameObject.name;
-            //Èç¹û×Öµä°üº¬£¬¾ÍÌí¼Óµ½ÎïÌåµÄ×é¼şListÖĞ
+            //å¦‚æœå­—å…¸åŒ…å«ï¼Œå°±æ·»åŠ åˆ°ç‰©ä½“çš„ç»„ä»¶Listä¸­
             if (controlDic.ContainsKey(objName))
                 controlDic[objName].Add(controls[i]);
-            //Èç¹û²»°üº¬£¬¾ÍĞÂ½¨Ò»¸öÎïÌåµÄ×é¼şList²¢Ìí¼Ó´Ë×é¼ş
+            //å¦‚æœä¸åŒ…å«ï¼Œå°±æ–°å»ºä¸€ä¸ªç‰©ä½“çš„ç»„ä»¶Listå¹¶æ·»åŠ æ­¤ç»„ä»¶
             else
                 controlDic.Add(objName, new List<UIBehaviour>() { controls[i] });
             
-            //Ìí¼ÓÊÂ¼ş¼àÌı
+            //æ·»åŠ äº‹ä»¶ç›‘å¬
             if(controls[i] is Button)
             {
                 (controls[i] as Button).onClick.AddListener(() =>
@@ -80,14 +76,14 @@ public abstract class BasePanel : MonoBehaviour
     }
 
     /// <summary>
-    /// »ñµÃÎïÌå¹ÒÔØµÄUI×é¼ş
+    /// è·å¾—ç‰©ä½“æŒ‚è½½çš„UIç»„ä»¶
     /// </summary>
-    /// <typeparam name="T">×é¼şÀàĞÍ</typeparam>
-    /// <param name="name">ÎïÌåÃû</param>
+    /// <typeparam name="T">ç»„ä»¶ç±»å‹</typeparam>
+    /// <param name="name">ç‰©ä½“å</param>
     /// <returns></returns>
     public T GetControl<T>(string name) where T : UIBehaviour
     {
-        //Ã¿¸öÎïÌåÖ»»á¹ÒÔØÒ»¸öÍ¬ÖÖÀàµÄ×é¼ş£¬ËùÒÔ²»»áÖØ¸´
+        //æ¯ä¸ªç‰©ä½“åªä¼šæŒ‚è½½ä¸€ä¸ªåŒç§ç±»çš„ç»„ä»¶ï¼Œæ‰€ä»¥ä¸ä¼šé‡å¤
         if (controlDic.ContainsKey(name))
         {
             for (int i = 0; i < controlDic[name].Count; i++)
@@ -100,11 +96,11 @@ public abstract class BasePanel : MonoBehaviour
         return null;
     }
 
-    #region ×ÓÀàÖØĞ´·½·¨
+    #region å­ç±»é‡å†™æ–¹æ³•
     /// <summary>
-    /// Ãæ°åÏÔÊ¾Ê±µ÷ÓÃ
+    /// é¢æ¿æ˜¾ç¤ºæ—¶è°ƒç”¨
     /// </summary>
-    /// <param name="isFade">ÊÇ·ñ¿ªÆô½¥±ä</param>
+    /// <param name="isFade">æ˜¯å¦å¼€å¯æ¸å˜</param>
     public virtual void ShowMe(bool isFade = true)
     {
         if (isFade)
@@ -116,9 +112,9 @@ public abstract class BasePanel : MonoBehaviour
     }
 
     /// <summary>
-    /// Ãæ°åÒş²ØÊ±µ÷ÓÃ
+    /// é¢æ¿éšè—æ—¶è°ƒç”¨
     /// </summary>
-    /// <param name="isFade">ÊÇ·ñ¿ªÆô½¥±ä</param>
+    /// <param name="isFade">æ˜¯å¦å¼€å¯æ¸å˜</param>
     public virtual void HideMe(bool isFade = true)
     {
         if (isFade)
@@ -151,9 +147,9 @@ public abstract class BasePanel : MonoBehaviour
     #endregion
 
     /// <summary>
-    /// Ãæ°å½¥±äÏÔÊ¾Òş²ØĞ­³Ì
+    /// é¢æ¿æ¸å˜æ˜¾ç¤ºéšè—åç¨‹
     /// </summary>
-    /// <param name="isIn">ÊÇ·ñÏÔÊ¾</param>
+    /// <param name="isIn">æ˜¯å¦æ˜¾ç¤º</param>
     /// <returns></returns>
     IEnumerator FadeInOut(bool isIn)
     {

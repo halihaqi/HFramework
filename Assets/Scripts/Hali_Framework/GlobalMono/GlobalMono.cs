@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// 全局Mono脚本，外部不调用，通过MonoMgr使用
+/// 鍏ㄥ眬Mono鑴氭湰锛屽閮ㄤ笉璋冪敤锛岄�氳繃MonoMgr浣跨敤
 /// </summary>
 public class GlobalMono : MonoBehaviour
 {
@@ -21,25 +21,25 @@ public class GlobalMono : MonoBehaviour
     }
 
     /// <summary>
-    /// 添加Update事件监听
+    /// 娣诲姞Update浜嬩欢鐩戝惉
     /// </summary>
-    /// <param name="action">事件</param>
+    /// <param name="action">浜嬩欢</param>
     public void AddUpdateListener(UnityAction action)
     {
         updateEvent += action;
     }
 
     /// <summary>
-    /// 移除Update事件监听
+    /// 绉婚櫎Update浜嬩欢鐩戝惉
     /// </summary>
-    /// <param name="action">事件</param>
+    /// <param name="action">浜嬩欢</param>
     public void RemoveUpdateListener(UnityAction action)
     {
         updateEvent -= action;
     }
 
     /// <summary>
-    /// 清空Update事件监听
+    /// 娓呯┖Update浜嬩欢鐩戝惉
     /// </summary>
     public void Clear()
     {

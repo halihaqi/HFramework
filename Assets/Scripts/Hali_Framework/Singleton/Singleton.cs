@@ -1,7 +1,7 @@
 using System;
 
 /// <summary>
-/// µ¥ÀıÄ£Ê½»ùÀà(²»¼Ì³ĞMono)
+/// å•ä¾‹æ¨¡å¼åŸºç±»(ä¸ç»§æ‰¿Mono)
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public abstract class Singleton<T> where T : Singleton<T>, new()
@@ -19,10 +19,10 @@ public abstract class Singleton<T> where T : Singleton<T>, new()
 }
 
 
-#region Pro°æ£¬ÓĞ¶àÏß³ÌËø£¬ÓĞË½ÓĞ¹¹Ôìº¯Êı(²»³£ÓÃ)
+#region Proç‰ˆï¼Œæœ‰å¤šçº¿ç¨‹é”ï¼Œæœ‰ç§æœ‰æ„é€ å‡½æ•°(ä¸å¸¸ç”¨)
 ///// <summary>
-///// µ¥ÀıÄ£Ê½»ùÀà(²»¼Ì³ĞMono)
-///// ÓĞ¶àÏß³ÌËø ÓĞË½ÓĞ¹¹Ôìº¯Êı
+///// å•ä¾‹æ¨¡å¼åŸºç±»(ä¸ç»§æ‰¿Mono)
+///// æœ‰å¤šçº¿ç¨‹é” æœ‰ç§æœ‰æ„é€ å‡½æ•°
 ///// </summary>
 ///// <typeparam name="T"></typeparam>
 //public abstract class Singleton<T> where T : Singleton<T>

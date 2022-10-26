@@ -5,12 +5,12 @@ using UnityEngine.Events;
 
 public class AudioMgr : Singleton<AudioMgr>
 {
-    //±³¾°ÒôÀÖ
+    //èƒŒæ™¯éŸ³ä¹
     private AudioSource bkMusic = null;
     private float bkMusicVolume = 1;
     private bool bkMusicOn = true;
 
-    //ÒôĞ§
+    //éŸ³æ•ˆ
     private GameObject soundObj = null;
     private Dictionary<string, AudioSource> soundDic = new Dictionary<string, AudioSource>();
     private float soundVolume = 1;
@@ -22,7 +22,7 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// Ã¿Ö¡ÅĞ¶ÏÒôĞ§ÊÇ·ñ²¥·ÅÍê±Ï
+    /// æ¯å¸§åˆ¤æ–­éŸ³æ•ˆæ˜¯å¦æ’­æ”¾å®Œæ¯•
     /// </summary>
     private void MusicUpdate()
     {
@@ -37,21 +37,21 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
 
-    #region ±³¾°ÒôÀÖ¹«¹²·½·¨
+    #region èƒŒæ™¯éŸ³ä¹å…¬å…±æ–¹æ³•
     /// <summary>
-    /// ²¥·Å±³¾°ÒôÀÖ
+    /// æ’­æ”¾èƒŒæ™¯éŸ³ä¹
     /// </summary>
-    /// <param name="path">ÒôÀÖÂ·¾¶</param>
+    /// <param name="path">éŸ³ä¹è·¯å¾„</param>
     public void PlayBkMusic(string path)
     {
-        //Èç¹ûÎª¿Õ£¬ÔÚ³¡¾°ÖĞĞÂ½¨²¢Ìí¼ÓAudioSource
+        //å¦‚æœä¸ºç©ºï¼Œåœ¨åœºæ™¯ä¸­æ–°å»ºå¹¶æ·»åŠ AudioSource
         if (bkMusic == null)
         {
             GameObject obj = new GameObject("BkMusic");
             bkMusic = obj.AddComponent<AudioSource>();
         }
 
-        //Òì²½¼ÓÔØÒôĞ§
+        //å¼‚æ­¥åŠ è½½éŸ³æ•ˆ
         ResMgr.Instance.LoadAsync<AudioClip>(path, (clip) =>
         {
             bkMusic.clip = clip;
@@ -63,9 +63,9 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// ¸Ä±ä±³¾°ÒôÀÖ´óĞ¡
+    /// æ”¹å˜èƒŒæ™¯éŸ³ä¹å¤§å°
     /// </summary>
-    /// <param name="Volume">ÒôÁ¿</param>
+    /// <param name="Volume">éŸ³é‡</param>
     public void ChangeBkMusicVolume(float Volume)
     {
         bkMusicVolume = Volume;
@@ -74,9 +74,9 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// ¸Ä±ä±³¾°ÒôÀÖ¿ª¹Ø
+    /// æ”¹å˜èƒŒæ™¯éŸ³ä¹å¼€å…³
     /// </summary>
-    /// <param name="isOn">ÊÇ·ñ¿ªÆô</param>
+    /// <param name="isOn">æ˜¯å¦å¼€å¯</param>
     public void ChangeBkMusicOn(bool isOn)
     {
         bkMusicOn = isOn;
@@ -85,7 +85,7 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// ÔİÍ£±³¾°ÒôÀÖ
+    /// æš‚åœèƒŒæ™¯éŸ³ä¹
     /// </summary>
     public void PauseBkMusic()
     {
@@ -98,7 +98,7 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// Í£Ö¹±³¾°ÒôÀÖ
+    /// åœæ­¢èƒŒæ™¯éŸ³ä¹
     /// </summary>
     public void StopBkMusic()
     {
@@ -111,18 +111,18 @@ public class AudioMgr : Singleton<AudioMgr>
     }
     #endregion
 
-    #region ÒôĞ§¹«¹²·½·¨
+    #region éŸ³æ•ˆå…¬å…±æ–¹æ³•
     /// <summary>
-    /// ²¥·ÅÒôĞ§
+    /// æ’­æ”¾éŸ³æ•ˆ
     /// </summary>
-    /// <param name="path">ÒôĞ§Â·¾¶</param>
-    /// <param name="callback">»Øµ÷º¯Êı,»ñµÃsource</param>
+    /// <param name="path">éŸ³æ•ˆè·¯å¾„</param>
+    /// <param name="callback">å›è°ƒå‡½æ•°,è·å¾—source</param>
     public void PlaySound(string path, bool isLoop, UnityAction<AudioSource> callback = null)
     {
-        //Èç¹û³¡¾°ÖĞÃ»ÓĞ¾ÍĞÂ½¨Sound¿ÕÎïÌå
+        //å¦‚æœåœºæ™¯ä¸­æ²¡æœ‰å°±æ–°å»ºSoundç©ºç‰©ä½“
         if(soundObj == null)
             soundObj = new GameObject("Sound");
-        //Òì²½¼ÓÔØÒôĞ§£¬¼ÓÔØÍê³Éºó²¥·Å²¢¼ÓÈësoundList
+        //å¼‚æ­¥åŠ è½½éŸ³æ•ˆï¼ŒåŠ è½½å®Œæˆåæ’­æ”¾å¹¶åŠ å…¥soundList
         ResMgr.Instance.LoadAsync<AudioClip>(path, (clip) =>
         {
             AudioSource source = soundObj.AddComponent<AudioSource>();
@@ -137,10 +137,10 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// ¸Ä±äµ¥¸öÒôĞ§´óĞ¡
+    /// æ”¹å˜å•ä¸ªéŸ³æ•ˆå¤§å°
     /// </summary>
-    /// <param name="path">ÒôĞ§Â·¾¶</param>
-    /// <param name="volume">ÒôÁ¿</param>
+    /// <param name="path">éŸ³æ•ˆè·¯å¾„</param>
+    /// <param name="volume">éŸ³é‡</param>
     public void ChangeSoundVolume(string path, float volume)
     {
         if (soundDic.ContainsKey(path))
@@ -148,9 +148,9 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// ¸Ä±äËùÓĞÒôĞ§´óĞ¡
+    /// æ”¹å˜æ‰€æœ‰éŸ³æ•ˆå¤§å°
     /// </summary>
-    /// <param name="volume">ÒôÁ¿</param>
+    /// <param name="volume">éŸ³é‡</param>
     public void ChangeAllSoundVolume(float volume)
     {
         soundVolume = volume;
@@ -161,10 +161,10 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// ¸Ä±äµ¥¸öÒôĞ§¿ª¹Ø
+    /// æ”¹å˜å•ä¸ªéŸ³æ•ˆå¼€å…³
     /// </summary>
-    /// <param name="path">Â·¾¶</param>
-    /// <param name="isOn">ÊÇ·ñ¿ªÆô</param>
+    /// <param name="path">è·¯å¾„</param>
+    /// <param name="isOn">æ˜¯å¦å¼€å¯</param>
     public void ChangeSoundOn(string path, bool isOn)
     {
         if (soundDic.ContainsKey(path))
@@ -172,9 +172,9 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// ¸Ä±äËùÓĞÒôĞ§¿ª¹Ø
+    /// æ”¹å˜æ‰€æœ‰éŸ³æ•ˆå¼€å…³
     /// </summary>
-    /// <param name="isOn">ÊÇ·ñ¿ªÆô</param>
+    /// <param name="isOn">æ˜¯å¦å¼€å¯</param>
     public void ChangeAllSoundOn(bool isOn)
     {
         soundOn = isOn;
@@ -185,9 +185,9 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// Í£Ö¹ÒôĞ§
+    /// åœæ­¢éŸ³æ•ˆ
     /// </summary>
-    /// <param name="source">ÒôĞ§×é¼ş</param>
+    /// <param name="source">éŸ³æ•ˆç»„ä»¶</param>
     public void StopSound(string path)
     {
         if (!soundDic.ContainsKey(path))
@@ -201,7 +201,7 @@ public class AudioMgr : Singleton<AudioMgr>
     }
 
     /// <summary>
-    /// Í£Ö¹ËùÓĞÒôĞ§
+    /// åœæ­¢æ‰€æœ‰éŸ³æ•ˆ
     /// </summary>
     public void StopAllSound()
     {

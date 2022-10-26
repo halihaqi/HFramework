@@ -5,13 +5,13 @@ using UnityEngine.Events;
 
 public class ResMgr : Singleton<ResMgr>
 {
-    //×ÊÔ´ÈİÆ÷
-    //ÓÅµã£º±ÜÃâÖØ¸´¼ÓÔØ£¬ÌáÉı¼ÓÔØĞ§ÂÊ
-    //È±µã£ºÄÚ´æÕ¼ÓÃ£¬ĞèÒªÔÚºÏÊÊÊ±»úÊÍ·Å
+    //èµ„æºå®¹å™¨
+    //ä¼˜ç‚¹ï¼šé¿å…é‡å¤åŠ è½½ï¼Œæå‡åŠ è½½æ•ˆç‡
+    //ç¼ºç‚¹ï¼šå†…å­˜å ç”¨ï¼Œéœ€è¦åœ¨åˆé€‚æ—¶æœºé‡Šæ”¾
     private Dictionary<string, object> resDic = new Dictionary<string, object>();
 
     /// <summary>
-    /// Çå¿Õ×ÊÔ´ÈİÆ÷£¬ÊÍ·ÅÄÚ´æ
+    /// æ¸…ç©ºèµ„æºå®¹å™¨ï¼Œé‡Šæ”¾å†…å­˜
     /// </summary>
     public void ClearResDic()
     {
@@ -19,20 +19,20 @@ public class ResMgr : Singleton<ResMgr>
     }
 
     /// <summary>
-    /// ¼ÓÔØ×ÊÔ´(Í¬²½)
+    /// åŠ è½½èµ„æº(åŒæ­¥)
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="path">×ÊÔ´Â·¾¶</param>
+    /// <param name="path">èµ„æºè·¯å¾„</param>
     /// <returns></returns>
     public T Load<T>(string path) where T : Object
     {
         T res = null;
-        //Èç¹û×ÖµäÖĞÓĞ£¬¾Í²»ÓÃ¼ÓÔØÁË
+        //å¦‚æœå­—å…¸ä¸­æœ‰ï¼Œå°±ä¸ç”¨åŠ è½½äº†
         if (resDic.ContainsKey(path))
             res = resDic[path] as T;
         else
             res = Resources.Load<T>(path);
-        //Èç¹ûÊÇGameObject£¬ÏÈÊµÀı»¯ÔÙ·µ»Ø
+        //å¦‚æœæ˜¯GameObjectï¼Œå…ˆå®ä¾‹åŒ–å†è¿”å›
         if (res is GameObject)
             return GameObject.Instantiate(res);
         else
@@ -40,11 +40,11 @@ public class ResMgr : Singleton<ResMgr>
     }
 
     /// <summary>
-    /// ¼ÓÔØ×ÊÔ´(Òì²½)
+    /// åŠ è½½èµ„æº(å¼‚æ­¥)
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="path">×ÊÔ´Â·¾¶</param>
-    /// <param name="callback">»Øµ÷º¯Êı</param>
+    /// <param name="path">èµ„æºè·¯å¾„</param>
+    /// <param name="callback">å›è°ƒå‡½æ•°</param>
     public void LoadAsync<T>(string path, UnityAction<T> callback = null) where T : Object
     {
         MonoMgr.Instance.StartCoroutine(AsyncLoad(path, callback));
@@ -53,7 +53,7 @@ public class ResMgr : Singleton<ResMgr>
     IEnumerator AsyncLoad<T>(string path, UnityAction<T> callback) where T : Object
     {
         T res = null;
-        //Èç¹û×ÖµäÖĞÓĞ£¬¾Í²»ÓÃ¼ÓÔØÁË
+        //å¦‚æœå­—å…¸ä¸­æœ‰ï¼Œå°±ä¸ç”¨åŠ è½½äº†
         if (resDic.ContainsKey(path))
             res = resDic[path] as T;
         else
@@ -62,7 +62,7 @@ public class ResMgr : Singleton<ResMgr>
             res = rr.asset as T;
         }
         yield return null;
-        //Èç¹ûÊÇGameObject£¬ÏÈÉú³ÉÔ¤ÖÆÌåÔÙÖ´ĞĞ»Øµ÷
+        //å¦‚æœæ˜¯GameObjectï¼Œå…ˆç”Ÿæˆé¢„åˆ¶ä½“å†æ‰§è¡Œå›è°ƒ
         if (res is GameObject)
             callback?.Invoke(GameObject.Instantiate(res));
         else

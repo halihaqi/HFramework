@@ -4,23 +4,23 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// ¶ÔÏó³Ø¹ÜÀíÆ÷
+/// å¯¹è±¡æ± ç®¡ç†å™¨
 /// </summary>
 public class PoolMgr : Singleton<PoolMgr>
 {
-    //»º´æ³ØÈİÆ÷
+    //ç¼“å­˜æ± å®¹å™¨
     private Dictionary<string, PoolData> poolDic = new Dictionary<string, PoolData>();
     private GameObject poolObj;
 
-    #region ¶ÔÏó³Ø¹«¹²·½·¨
+    #region å¯¹è±¡æ± å…¬å…±æ–¹æ³•
     /// <summary>
-    /// ´Ó»º´æ³ØÈ¡³ö
+    /// ä»ç¼“å­˜æ± å–å‡º
     /// </summary>
-    /// <param name="path">ÎïÌåÂ·¾¶</param>
-    /// <param name="callback">È¡Íê»Øµ÷</param>
+    /// <param name="path">ç‰©ä½“è·¯å¾„</param>
+    /// <param name="callback">å–å®Œå›è°ƒ</param>
     public void PopObj(string path, UnityAction<GameObject> callback)
     {
-        //Èç¹ûÓĞÕâ¸ö³Ø²¢ÇÒ³ØÀïÓĞÎ´Ê¹ÓÃµÄÎïÌå
+        //å¦‚æœæœ‰è¿™ä¸ªæ± å¹¶ä¸”æ± é‡Œæœ‰æœªä½¿ç”¨çš„ç‰©ä½“
         if (poolDic.ContainsKey(path) && poolDic[path].poolList.Count > 0)
         {
             GameObject obj = poolDic[path].Pop();
@@ -38,33 +38,33 @@ public class PoolMgr : Singleton<PoolMgr>
 
 
     /// <summary>
-    /// Ñ¹Èë»º´æ³Ø
+    /// å‹å…¥ç¼“å­˜æ± 
     /// </summary>
-    /// <param name="path">ÎïÌåÂ·¾¶</param>
-    /// <param name="obj">ÎïÌåÊµÀı</param>
+    /// <param name="path">ç‰©ä½“è·¯å¾„</param>
+    /// <param name="obj">ç‰©ä½“å®ä¾‹</param>
     public void PushObj(string path, GameObject obj)
     {
-        //Èç¹ûÓĞÕâ¸ö»º´æ³Ø
+        //å¦‚æœæœ‰è¿™ä¸ªç¼“å­˜æ± 
         if (poolDic.ContainsKey(path))
         {
             poolDic[path].Push(obj);
         }
         else
         {
-            //Èç¹ûÃ»ÓĞ¾ÍĞÂ½¨Ò»¸ö»º´æ³Ø
+            //å¦‚æœæ²¡æœ‰å°±æ–°å»ºä¸€ä¸ªç¼“å­˜æ± 
             if (poolObj == null)
                 poolObj = new GameObject("Pool");
-            //new PoolDataµ÷ÓÃÓĞ²Î¹¹Ôìº¯Êı£¬Ö´ĞĞ¹ı³Ì:
-            //ÉèÖÃ¶ÔÏó³Ø¸¸¶ÔÏó
-            //ĞÂ½¨¶ÔÏó³Ø
-            //½«objÑ¹Èë¶ÔÏó³Ø
+            //new PoolDataè°ƒç”¨æœ‰å‚æ„é€ å‡½æ•°ï¼Œæ‰§è¡Œè¿‡ç¨‹:
+            //è®¾ç½®å¯¹è±¡æ± çˆ¶å¯¹è±¡
+            //æ–°å»ºå¯¹è±¡æ± 
+            //å°†objå‹å…¥å¯¹è±¡æ± 
             poolDic.Add(path, new PoolData(obj, poolObj));
         }
     }
 
 
     /// <summary>
-    /// Çå¿Õ¶ÔÏó³Ø
+    /// æ¸…ç©ºå¯¹è±¡æ± 
     /// </summary>
     public void Clear()
     {
@@ -76,17 +76,17 @@ public class PoolMgr : Singleton<PoolMgr>
 
 
 
-    #region ¶ÔÏó³ØÊı¾İ½á¹¹Àà(ÄÚ²¿Àà)
+    #region å¯¹è±¡æ± æ•°æ®ç»“æ„ç±»(å†…éƒ¨ç±»)
     private class PoolData
     {
-        public GameObject parentObj;    //×Ó¶ÔÏó³Ø
-        public Stack<GameObject> poolList;  //¶ÔÏó³Ø¶ÔÏóÁĞ±í
+        public GameObject parentObj;    //å­å¯¹è±¡æ± 
+        public Stack<GameObject> poolList;  //å¯¹è±¡æ± å¯¹è±¡åˆ—è¡¨
 
         /// <summary>
-        /// ¶ÔÏó³Ø¹¹Ôìº¯Êı
+        /// å¯¹è±¡æ± æ„é€ å‡½æ•°
         /// </summary>
-        /// <param name="obj">µÚÒ»¸ö¶ÔÏó</param>
-        /// <param name="poolObj">¶ÔÏó³Ø</param>
+        /// <param name="obj">ç¬¬ä¸€ä¸ªå¯¹è±¡</param>
+        /// <param name="poolObj">å¯¹è±¡æ± </param>
         public PoolData(GameObject obj, GameObject poolObj)
         {
             this.parentObj = new GameObject(obj.name);
@@ -96,9 +96,9 @@ public class PoolMgr : Singleton<PoolMgr>
         }
 
         /// <summary>
-        /// ´Ó¶ÔÏó³ØÈ¡³ö¶ÔÏó
+        /// ä»å¯¹è±¡æ± å–å‡ºå¯¹è±¡
         /// </summary>
-        /// <returns>ÄÃ³öµÄ¶ÔÏó</returns>
+        /// <returns>æ‹¿å‡ºçš„å¯¹è±¡</returns>
         public GameObject Pop()
         {
             GameObject obj = poolList.Pop();
@@ -108,9 +108,9 @@ public class PoolMgr : Singleton<PoolMgr>
         }
 
         /// <summary>
-        /// Ïò¶ÔÏó³ØÑ¹Èë¶ÔÏó
+        /// å‘å¯¹è±¡æ± å‹å…¥å¯¹è±¡
         /// </summary>
-        /// <param name="obj">ÒªÑ¹ÈëµÄ¶ÔÏó</param>
+        /// <param name="obj">è¦å‹å…¥çš„å¯¹è±¡</param>
         public void Push(GameObject obj)
         {
             obj.SetActive(false);
@@ -119,7 +119,7 @@ public class PoolMgr : Singleton<PoolMgr>
         }
 
         /// <summary>
-        /// Çå¿Õ¶ÔÏó³Ø
+        /// æ¸…ç©ºå¯¹è±¡æ± 
         /// </summary>
         public void Clear()
         {

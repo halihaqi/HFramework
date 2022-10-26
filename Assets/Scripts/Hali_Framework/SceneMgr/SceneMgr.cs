@@ -7,13 +7,13 @@ using UnityEngine.SceneManagement;
 public class SceneMgr : Singleton<SceneMgr>
 {
     /// <summary>
-    /// ¼ÓÔØ³¡¾°(Í¬²½)
+    /// åŠ è½½åœºæ™¯(åŒæ­¥)
     /// </summary>
-    /// <param name="name">³¡¾°Ãû</param>
+    /// <param name="name">åœºæ™¯å</param>
     public void LoadScene(string name)
     {
-        //ÇĞ»»ÏÂÒ»¸ö³¡¾°Ç°£¬Çå¿Õ¶ÔÏó³ØºÍ×ÊÔ´×Öµä£¬ÊÍ·Å¿Õ¼ä
-        //¶ÔÏó³ØÈç¹û²»Çå¿Õ»áµ¼ÖÂ×ÖµäÖĞÓĞ¶ÔÏóµ«³¡¾°ÖĞ±»Ïú»Ù
+        //åˆ‡æ¢ä¸‹ä¸€ä¸ªåœºæ™¯å‰ï¼Œæ¸…ç©ºå¯¹è±¡æ± å’Œèµ„æºå­—å…¸ï¼Œé‡Šæ”¾ç©ºé—´
+        //å¯¹è±¡æ± å¦‚æœä¸æ¸…ç©ºä¼šå¯¼è‡´å­—å…¸ä¸­æœ‰å¯¹è±¡ä½†åœºæ™¯ä¸­è¢«é”€æ¯
         ResMgr.Instance.ClearResDic();
         PoolMgr.Instance.Clear();
         SceneManager.LoadScene(name);
@@ -21,12 +21,12 @@ public class SceneMgr : Singleton<SceneMgr>
     }
 
     /// <summary>
-    /// ¼ÓÔØ³¡¾°(Òì²½)
-    /// ¼ÓÔØ¹ı³ÌÖĞ»á·Ö·¢ÊÂ¼ş"Loading"
-    /// ¼ÓÔØ½áÊø»á·Ö·¢ÎŞ²ÎÊÂ¼ş"LoadComplete"
+    /// åŠ è½½åœºæ™¯(å¼‚æ­¥)
+    /// åŠ è½½è¿‡ç¨‹ä¸­ä¼šåˆ†å‘äº‹ä»¶"Loading"
+    /// åŠ è½½ç»“æŸä¼šåˆ†å‘æ— å‚äº‹ä»¶"LoadComplete"
     /// </summary>
-    /// <param name="name">³¡¾°Ãû</param>
-    /// <param name="action">Íê³É»Øµ÷º¯Êı</param>
+    /// <param name="name">åœºæ™¯å</param>
+    /// <param name="action">å®Œæˆå›è°ƒå‡½æ•°</param>
     public void LoadSceneAsync(string name, UnityAction callback)
     {
         ResMgr.Instance.ClearResDic();
@@ -35,26 +35,26 @@ public class SceneMgr : Singleton<SceneMgr>
     }
 
     /// <summary>
-    /// ¼ÓÔØ³¡¾°(ÏÔÊ¾LoadingUI½çÃæ)
-    /// ¼ÓÔØ¹ı³ÌÖĞ»á·Ö·¢ÓĞ²ÎÊÂ¼ş"Loading",²ÎÊıÎª¼ÓÔØ½ø¶È
-    /// ¼ÓÔØ½áÊø»á·Ö·¢ÎŞ²ÎÊÂ¼ş"LoadComplete"£¬»á×Ô¶¯Òş²Ø¼ÓÔØÃæ°å
+    /// åŠ è½½åœºæ™¯(æ˜¾ç¤ºLoadingUIç•Œé¢)
+    /// åŠ è½½è¿‡ç¨‹ä¸­ä¼šåˆ†å‘æœ‰å‚äº‹ä»¶"Loading",å‚æ•°ä¸ºåŠ è½½è¿›åº¦
+    /// åŠ è½½ç»“æŸä¼šåˆ†å‘æ— å‚äº‹ä»¶"LoadComplete"ï¼Œä¼šè‡ªåŠ¨éšè—åŠ è½½é¢æ¿
     /// </summary>
-    /// <param name="name">³¡¾°Ãû</param>
-    /// <param name="panelName">¼ÓÔØ½çÃæPanelÔ¤ÉèÌåÃû</param>
-    /// <param name="callback">¼ÓÔØÍê³ÉµÄ»Øµ÷</param>
+    /// <param name="name">åœºæ™¯å</param>
+    /// <param name="panelName">åŠ è½½ç•Œé¢Panelé¢„è®¾ä½“å</param>
+    /// <param name="callback">åŠ è½½å®Œæˆçš„å›è°ƒ</param>
     public void LoadSceneAsync<T>(string name, string panelName, UnityAction callback) where T : BasePanel
     {
-        //ÏÈÏÔÊ¾LoadingUI
+        //å…ˆæ˜¾ç¤ºLoadingUI
         UIMgr.Instance.ShowPanel<T>(panelName, E_UI_Layer.System, (panel) =>
         {
-            //ÏÔÊ¾Íêºó¿ªÊ¼ÇĞ»»³¡¾°
+            //æ˜¾ç¤ºå®Œåå¼€å§‹åˆ‡æ¢åœºæ™¯
             ResMgr.Instance.ClearResDic();
             PoolMgr.Instance.Clear();
             MonoMgr.Instance.StartCoroutine(AsyncLoad<T>(name, panelName, callback));
         });
     }
 
-    //Òì²½¼ÓÔØ³¡¾°Ğ­³Ì
+    //å¼‚æ­¥åŠ è½½åœºæ™¯åç¨‹
     IEnumerator AsyncLoad(string name,UnityAction action)
     {
         AsyncOperation ao = SceneManager.LoadSceneAsync(name);
@@ -63,26 +63,26 @@ public class SceneMgr : Singleton<SceneMgr>
             yield return ao.progress;
             EventCenter.Instance.PostEvent("Loading");
         }
-        //µÈÒ»Ö¡£¬Îª½çÃæ¸üĞÂÌá¹©Ê±»ú
+        //ç­‰ä¸€å¸§ï¼Œä¸ºç•Œé¢æ›´æ–°æä¾›æ—¶æœº
         yield return null;
         EventCenter.Instance.PostEvent("LoadComplete");
         action?.Invoke();
     }
 
-    //Òì²½¼ÓÔØ³¡¾°Ğ­³Ì(ÓĞUIÕÚµ²)
+    //å¼‚æ­¥åŠ è½½åœºæ™¯åç¨‹(æœ‰UIé®æŒ¡)
     IEnumerator AsyncLoad<T>(string name, string panelName, UnityAction callback) where T : BasePanel
     {
-        //ÉêÃ÷toProgress±íÊ¾¼ÙµÄ¼ÓÔØ½ø¶È
-        //ÒòÎªao.progressÔÚ¼ÓÔØĞ¡³¡¾°Ê±±ä»¯Ì«¿ì£¬Ğ§¹û²»ºÃ
+        //ç”³æ˜toProgressè¡¨ç¤ºå‡çš„åŠ è½½è¿›åº¦
+        //å› ä¸ºao.progressåœ¨åŠ è½½å°åœºæ™¯æ—¶å˜åŒ–å¤ªå¿«ï¼Œæ•ˆæœä¸å¥½
         int toProgress = 0;
         AsyncOperation ao = SceneManager.LoadSceneAsync(name);
         ao.allowSceneActivation = false;
 
-        //ÔÚallowSceneActivation = trueÖ®Ç°progressÖ»»á¼ÓÔØµ½0.9
-        //ĞèÒªÊÖ¶¯ÉèÖÃ
+        //åœ¨allowSceneActivation = trueä¹‹å‰progressåªä¼šåŠ è½½åˆ°0.9
+        //éœ€è¦æ‰‹åŠ¨è®¾ç½®
         while (ao.progress < 0.9f)
         {
-            //ÕâÀï±íÊ¾µÄ¼ÙµÄ½ø¶È±ä»¯£¬Èç¹ûĞ¡ÓÚao.progres£¬Ã¿Ö¡¼Ó1
+            //è¿™é‡Œè¡¨ç¤ºçš„å‡çš„è¿›åº¦å˜åŒ–ï¼Œå¦‚æœå°äºao.progresï¼Œæ¯å¸§åŠ 1
             while (toProgress < (int)(ao.progress * 100))
             {
                 toProgress++;
@@ -90,12 +90,12 @@ public class SceneMgr : Singleton<SceneMgr>
                 yield return toProgress;
             }
         }
-        //¼ÓÔØµ½0.9ºóÊÖ¶¯ÉèÖÃÎªtrue
-        //»á¼ÌĞø¼ÓÔØ0.9~1µÄ×ÊÔ´²¢¿ªÆô³¡¾°
-        //´ËÊ±»¹²»Ó¦¸ÃÏÔÊ¾³¡¾°
+        //åŠ è½½åˆ°0.9åæ‰‹åŠ¨è®¾ç½®ä¸ºtrue
+        //ä¼šç»§ç»­åŠ è½½0.9~1çš„èµ„æºå¹¶å¼€å¯åœºæ™¯
+        //æ­¤æ—¶è¿˜ä¸åº”è¯¥æ˜¾ç¤ºåœºæ™¯
         ao.allowSceneActivation = true;
-        //isDoneÖ»ÓĞÔÚallowSceneActivationÎªtrue²¢ÇÒ¼ÓÔØÍêºó²ÅÎªtrue
-        //¿ÉÒÔÍ¨¹ıÕâ¸öÅĞ¶ÏÊÇ·ñ¼ÓÔØÍê³É
+        //isDoneåªæœ‰åœ¨allowSceneActivationä¸ºtrueå¹¶ä¸”åŠ è½½å®Œåæ‰ä¸ºtrue
+        //å¯ä»¥é€šè¿‡è¿™ä¸ªåˆ¤æ–­æ˜¯å¦åŠ è½½å®Œæˆ
         while (!ao.isDone)
         {
             toProgress = 95;
@@ -104,7 +104,7 @@ public class SceneMgr : Singleton<SceneMgr>
         }
         toProgress = 100;
         EventCenter.Instance.PostEvent("Loading", toProgress);
-        //µÈÒ»Ö¡£¬Îª½çÃæ¸üĞÂÌá¹©Ê±»ú
+        //ç­‰ä¸€å¸§ï¼Œä¸ºç•Œé¢æ›´æ–°æä¾›æ—¶æœº
         yield return null;
         callback?.Invoke();
         UIMgr.Instance.HidePanel(panelName);

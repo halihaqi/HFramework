@@ -10,31 +10,31 @@ public class MonoMgr : Singleton<MonoMgr>
     public MonoMgr()
     {
         GameObject obj = new GameObject("GlobalMono");
-        //GlobalMonoµÄStart()ÖĞÓĞ¹ı³¡¾°²»Ïú»Ù
+        //GlobalMonoçš„Start()ä¸­æœ‰è¿‡åœºæ™¯ä¸é”€æ¯
         globalMono = obj.AddComponent<GlobalMono>();
     }
 
-    #region UpdateÏà¹Ø¹«¹²·½·¨
+    #region Updateç›¸å…³å…¬å…±æ–¹æ³•
     /// <summary>
-    /// Ìí¼ÓUpdateÊÂ¼ş¼àÌı
+    /// æ·»åŠ Updateäº‹ä»¶ç›‘å¬
     /// </summary>
-    /// <param name="action">ÊÂ¼ş</param>
+    /// <param name="action">äº‹ä»¶</param>
     public void AddUpdateListener(UnityAction action)
     {
         globalMono.AddUpdateListener(action);
     }
 
     /// <summary>
-    /// ÒÆ³ıUpdateÊÂ¼ş¼àÌı
+    /// ç§»é™¤Updateäº‹ä»¶ç›‘å¬
     /// </summary>
-    /// <param name="action">ÊÂ¼ş</param>
+    /// <param name="action">äº‹ä»¶</param>
     public void RemoveUpdateListener(UnityAction action)
     {
         globalMono.RemoveUpdateListener(action);
     }
 
     /// <summary>
-    /// Çå¿ÕUpdateÊÂ¼ş¼àÌı
+    /// æ¸…ç©ºUpdateäº‹ä»¶ç›‘å¬
     /// </summary>
     public void Clear()
     {
@@ -42,8 +42,8 @@ public class MonoMgr : Singleton<MonoMgr>
     }
     #endregion
 
-    #region CoroutineÏà¹Ø¹«¹²·½·¨
-    //¿ªÆôĞ­³Ì
+    #region Coroutineç›¸å…³å…¬å…±æ–¹æ³•
+    //å¼€å¯åç¨‹
     public Coroutine StartCoroutine(IEnumerator routine)
     {
         return globalMono.StartCoroutine(routine);
@@ -54,7 +54,7 @@ public class MonoMgr : Singleton<MonoMgr>
         return globalMono.StartCoroutine(methodName);
     }
 
-    //Í£Ö¹Ğ­³Ì
+    //åœæ­¢åç¨‹
     public void StopCoroutine(IEnumerator routine)
     {
         globalMono.StopCoroutine(routine);
@@ -65,7 +65,7 @@ public class MonoMgr : Singleton<MonoMgr>
         globalMono.StopCoroutine(methodName);
     }
 
-    //Í£Ö¹ËùÓĞĞ­³Ì
+    //åœæ­¢æ‰€æœ‰åç¨‹
     public void StopAllCoroutines()
     {
         globalMono.StopAllCoroutines();

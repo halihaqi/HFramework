@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class InputMgr : Singleton<InputMgr>
 {
-    //ÊÇ·ñ¿ªÆôÊäÈë¼ì²â
+    //æ˜¯å¦å¼€å¯è¾“å…¥æ£€æµ‹
     bool isOpenCheck = false;
     public InputMgr()
     {
@@ -12,7 +12,7 @@ public class InputMgr : Singleton<InputMgr>
     }
 
     /// <summary>
-    /// ¼ì²éKeyÊäÈë
+    /// æ£€æŸ¥Keyè¾“å…¥
     /// </summary>
     /// <param name="key"></param>
     private void KeyCheck(KeyCode key)
@@ -26,7 +26,7 @@ public class InputMgr : Singleton<InputMgr>
     }
 
     /// <summary>
-    /// ÔÚGlobalMonoÃ¿Ö¡µ÷ÓÃ
+    /// åœ¨GlobalMonoæ¯å¸§è°ƒç”¨
     /// </summary>
     private void InputUpdate()
     {
@@ -40,9 +40,9 @@ public class InputMgr : Singleton<InputMgr>
     }
 
 
-    #region Íâ²¿µ÷ÓÃ·½·¨
+    #region å¤–éƒ¨è°ƒç”¨æ–¹æ³•
     /// <summary>
-    /// ¿ªÆô¹Ø±ÕÊäÈë¼ì²â
+    /// å¼€å¯å…³é—­è¾“å…¥æ£€æµ‹
     /// </summary>
     /// <param name="isOpen"></param>
     public void OpenOrClose(bool isOpen)

@@ -5,10 +5,10 @@ using UnityEngine;
 public static class Transform_Expand
 {
     /// <summary>
-    /// Éî¶ÈËÑË÷×ÓÎïÌå
+    /// æ·±åº¦æœç´¢å­ç‰©ä½“
     /// </summary>
     /// <param name="root"></param>
-    /// <param name="name">×ÓÎïÌåÃû</param>
+    /// <param name="name">å­ç‰©ä½“å</param>
     /// <returns></returns>
     public static Transform DeepGetChild(this Transform root, string name)
     {

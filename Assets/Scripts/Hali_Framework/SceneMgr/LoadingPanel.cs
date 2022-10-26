@@ -12,7 +12,7 @@ public class LoadingPanel : BasePanel
     public override void ShowMe(bool isFade = true)
     {
         base.ShowMe(isFade);
-        //Ìí¼Ó½ø¶ÈÌõ±ä»¯ÊÂ¼þ¼àÌý
+        //æ·»åŠ è¿›åº¦æ¡å˜åŒ–äº‹ä»¶ç›‘å¬
         progressEvent = (val) => { sliderProgress.value = (float)val / 100; };
         EventCenter.Instance.AddListener<int>("Loading", progressEvent);
     }

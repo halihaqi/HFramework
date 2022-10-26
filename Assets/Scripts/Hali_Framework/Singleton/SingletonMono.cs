@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// µ¥ÀıÄ£Ê½(¼Ì³ĞMono)
-/// ¹ı³¡¾°É¾³ı
+/// å•ä¾‹æ¨¡å¼(ç»§æ‰¿Mono)
+/// è¿‡åœºæ™¯åˆ é™¤
 /// </summary>
 /// <typeparam name="T"></typeparam>
-[DisallowMultipleComponent]//Í¬Ò»ÎïÌåÖ»ÔÊĞí¹ÒÒ»´ÎÕâ¸ö½Å±¾
+[DisallowMultipleComponent]//åŒä¸€ç‰©ä½“åªå…è®¸æŒ‚ä¸€æ¬¡è¿™ä¸ªè„šæœ¬
 public abstract class SingletonMono<T> : MonoBehaviour where T : SingletonMono<T>
 {
     private static T instance;

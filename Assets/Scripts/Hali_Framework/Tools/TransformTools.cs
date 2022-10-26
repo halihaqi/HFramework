@@ -5,8 +5,8 @@ using UnityEngine;
 public static class TransformTools
 {
     /// <summary>
-    /// 限制自定义角度的范围到欧拉角
-    /// (不可以限制localEulerAngles,因为它会自动修改)
+    /// 闄愬埗鑷畾涔夎搴︾殑鑼冨洿鍒版鎷夎
+    /// (涓嶅彲浠ラ檺鍒秎ocalEulerAngles,鍥犱负瀹冧細鑷姩淇敼)
     /// </summary>
     /// <param name="ifAngel"></param>
     /// <param name="ifMin"></param>

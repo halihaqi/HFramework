@@ -5,25 +5,25 @@ using UnityEngine;
 public class ThirdPersonCam : MonoBehaviour
 {
     [Header("Base")]
-    public Transform followTarget;//Ïà»ú¸úËæÄ¿±ê
-    public float sensitive = 12;//Ïà»ú¸úËæÃô¸Ğ¶È
-    public Vector3 shoulderOffset = Vector3.right;//¸úËæÄ¿±ê¼ç²¿Æ«ÒÆ
-    public float camDistance = 3;//Ïà»ú¾àÄ¿±ê¾àÀë
+    public Transform followTarget;//ç›¸æœºè·Ÿéšç›®æ ‡
+    public float sensitive = 12;//ç›¸æœºè·Ÿéšæ•æ„Ÿåº¦
+    public Vector3 shoulderOffset = Vector3.right;//è·Ÿéšç›®æ ‡è‚©éƒ¨åç§»
+    public float camDistance = 3;//ç›¸æœºè·ç›®æ ‡è·ç¦»
     [Range(0f, 1f)]
-    public float camSide = 0.6f;//»­ÃæÏà¶ÔÓÚ¼ç²¿Æ«ÒÆµÄ×óÓÒÆ«ÒÆ
+    public float camSide = 0.6f;//ç”»é¢ç›¸å¯¹äºè‚©éƒ¨åç§»çš„å·¦å³åç§»
 
     [Header("Obstacles")]
-    public LayerMask camCollisionFilter = 1;//Ïà»ú¼ì²âÇ½±Ú²ã¼¶
+    public LayerMask camCollisionFilter = 1;//ç›¸æœºæ£€æµ‹å¢™å£å±‚çº§
     [Tag]
-    public string ignoreTag = "Player";//¼ì²âºöÂÔÄ¿±êTag£¬Ò»°ãÎªÄ¿±êÎïÌåTag
+    public string ignoreTag = "Player";//æ£€æµ‹å¿½ç•¥ç›®æ ‡Tagï¼Œä¸€èˆ¬ä¸ºç›®æ ‡ç‰©ä½“Tag
     [Range(0.001f, 1f)]
-    public float camRadius = 0.15f;//Ïà»úÅö×²´óĞ¡
+    public float camRadius = 0.15f;//ç›¸æœºç¢°æ’å¤§å°
 
-    //ÉäÏß¼ì²â
+    //å°„çº¿æ£€æµ‹
     private Ray ray;
     private RaycastHit hit;
 
-    //Ä¿±êÎ»ÖÃ
+    //ç›®æ ‡ä½ç½®
     private Vector3 offset;
     private Vector3 targetFollowPos;
     private Vector3 targetLookPos;
@@ -34,10 +34,10 @@ public class ThirdPersonCam : MonoBehaviour
         if (followTarget == null)
             return;
 
-        //¼ÆËãÄ¿±êÎ»ÖÃºÍĞı×ª
+        //è®¡ç®—ç›®æ ‡ä½ç½®å’Œæ—‹è½¬
         CalTargetPos();
 
-        //Èç¹û±»×èµ²
+        //å¦‚æœè¢«é˜»æŒ¡
         if (IsObstructed())
         {
             float dis = Vector3.Distance(hit.point, followTarget.position) - 0.2f;
@@ -51,7 +51,7 @@ public class ThirdPersonCam : MonoBehaviour
         else
             isTransmit = false;
 
-        //ÒÆ¶¯ºÍĞı×ªÏà»ú
+        //ç§»åŠ¨å’Œæ—‹è½¬ç›¸æœº
         transform.position = Vector3.Lerp(transform.position, targetFollowPos, sensitive * Time.deltaTime);
         //transform.LookAt(targetLookPos);
         transform.rotation = Quaternion.LookRotation(targetLookPos - transform.position, Vector3.up);
@@ -59,9 +59,9 @@ public class ThirdPersonCam : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ì²âÊÇ·ñ±»×èµ²
+    /// æ£€æµ‹æ˜¯å¦è¢«é˜»æŒ¡
     /// </summary>
-    /// <param name="collider">Èç¹û±»×èµ²£¬out±»×èµ²µÄÎïÌå</param>
+    /// <param name="collider">å¦‚æœè¢«é˜»æŒ¡ï¼Œoutè¢«é˜»æŒ¡çš„ç‰©ä½“</param>
     /// <returns></returns>
     private bool IsObstructed()
     {
@@ -72,8 +72,8 @@ public class ThirdPersonCam : MonoBehaviour
         Physics.Raycast(ray, out hit, 1000, camCollisionFilter);
         if (hit.collider != null && hit.collider.tag != ignoreTag)
         {
-            //Èç¹ûÍæ¼ÒºÍÕÏ°­µÄ¾àÀë¶ÌÓÚÍæ¼ÒºÍÏà»úµÄ¾àÀë
-            //ËµÃ÷ÊÓÏß±»ÕÚµ²
+            //å¦‚æœç©å®¶å’Œéšœç¢çš„è·ç¦»çŸ­äºç©å®¶å’Œç›¸æœºçš„è·ç¦»
+            //è¯´æ˜è§†çº¿è¢«é®æŒ¡
             float dis = Vector3.Distance(followTarget.position, hit.point) - 0.5f;
             if(dis < Vector3.Distance(followTarget.position, transform.position))
             {
@@ -84,11 +84,11 @@ public class ThirdPersonCam : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼ÆËãÄ¿±êÒÆ¶¯Ğı×ª
+    /// è®¡ç®—ç›®æ ‡ç§»åŠ¨æ—‹è½¬
     /// </summary>
     private void CalTargetPos()
     {
-        //¼ÆËãÏà»úÎ»ÖÃºÍ³¯ÏòÆ«ÒÆÖµ
+        //è®¡ç®—ç›¸æœºä½ç½®å’Œæœå‘åç§»å€¼
         offset = followTarget.right * shoulderOffset.x * (camSide - 0.5f) * 2
                     + followTarget.up * shoulderOffset.y
                         + followTarget.forward * shoulderOffset.z;
@@ -104,19 +104,19 @@ public class ThirdPersonCam : MonoBehaviour
         Vector3 targetFollowPos = followTarget.position + offset - followTarget.forward * camDistance;
         Vector3 targetLookPos = followTarget.position + offset;
 
-        //Ïà»úÎ»ÖÃ
+        //ç›¸æœºä½ç½®
         Gizmos.color = Color.red;
         Gizmos.DrawLine(targetLookPos, targetFollowPos);
         Gizmos.DrawSphere(targetFollowPos, 0.05f);
 
-        //¹Û²ìÎ»ÖÃ
+        //è§‚å¯Ÿä½ç½®
         Gizmos.color = Color.green;
         Gizmos.DrawLine(targetLookPos, targetLookPos);
         Gizmos.DrawSphere(targetLookPos, 0.05f);
 
-        //ÕÚµ²¼ì²â·¶Î§
+        //é®æŒ¡æ£€æµ‹èŒƒå›´
         Gizmos.color = Color.blue;
-        //Ô²ĞÎ¼ì²â
+        //åœ†å½¢æ£€æµ‹
         ray.origin = targetLookPos;
         ray.direction = transform.position - targetLookPos;
         if (Physics.Raycast(ray, out hit, 1000, camCollisionFilter))

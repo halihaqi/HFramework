@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// µ¥ÀıÄ£Ê½(¼Ì³ĞMono)
-/// ×Ô¶¯´´½¨¿ÕÎïÌå£¬²»ĞèÒªÍÏµ½³¡¾°ÖĞ,¹ı³¡¾°²»Ïú»Ù
+/// å•ä¾‹æ¨¡å¼(ç»§æ‰¿Mono)
+/// è‡ªåŠ¨åˆ›å»ºç©ºç‰©ä½“ï¼Œä¸éœ€è¦æ‹–åˆ°åœºæ™¯ä¸­,è¿‡åœºæ™¯ä¸é”€æ¯
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public abstract class SinletonAutoMono<T> : MonoBehaviour where T : SinletonAutoMono<T>

@@ -5,13 +5,13 @@ using UnityEngine.Events;
 
 public class EventCenter : Singleton<EventCenter>
 {
-    #region ÄÚ²¿ÀàºÍ½Ó¿Ú
+    #region å†…éƒ¨ç±»å’Œæ¥å£
     /// <summary>
-    /// ¸¸Àà¿Õ½Ó¿Ú
+    /// çˆ¶ç±»ç©ºæ¥å£
     /// </summary>
     interface IEventInfo { }
     /// <summary>
-    /// ÓĞ²ÎÎ¯ÍĞ
+    /// æœ‰å‚å§”æ‰˜
     /// </summary>
     /// <typeparam name="T"></typeparam>
     class EventInfo<T> : IEventInfo
@@ -25,7 +25,7 @@ public class EventCenter : Singleton<EventCenter>
 
 
     /// <summary>
-    /// ÎŞ²ÎÎ¯ÍĞ
+    /// æ— å‚å§”æ‰˜
     /// </summary>
     class EventInfo : IEventInfo
     {
@@ -37,22 +37,22 @@ public class EventCenter : Singleton<EventCenter>
     }
     #endregion
 
-    //ÊÂ¼şÈİÆ÷,¸¸Àà½Ó¿Ú×°×ÓÀà
+    //äº‹ä»¶å®¹å™¨,çˆ¶ç±»æ¥å£è£…å­ç±»
     private Dictionary<string, IEventInfo> eventDic = new Dictionary<string, IEventInfo>();
 
     /// <summary>
-    /// Ìí¼ÓÊÂ¼ş¼àÌı(ÓĞ²Î)
+    /// æ·»åŠ äº‹ä»¶ç›‘å¬(æœ‰å‚)
     /// </summary>
-    /// <param name="name">ÊÂ¼şÃû</param>
-    /// <param name="action">ÊÂ¼şÂß¼­</param>
+    /// <param name="name">äº‹ä»¶å</param>
+    /// <param name="action">äº‹ä»¶é€»è¾‘</param>
     public void AddListener<T>(string name, UnityAction<T> action)
     {
-        //Èç¹û×ÖµäÖĞÓĞÕâ¸öÊÂ¼ş¼àÌı
+        //å¦‚æœå­—å…¸ä¸­æœ‰è¿™ä¸ªäº‹ä»¶ç›‘å¬
         if (eventDic.ContainsKey(name))
         {
             (eventDic[name] as EventInfo<T>).actions += action;
         }
-        //Èç¹ûÃ»ÓĞ
+        //å¦‚æœæ²¡æœ‰
         else
         {
             eventDic.Add(name, new EventInfo<T>(action));
@@ -61,18 +61,18 @@ public class EventCenter : Singleton<EventCenter>
 
 
     /// <summary>
-    /// Ìí¼ÓÊÂ¼ş¼àÌı(ÎŞ²Î)
+    /// æ·»åŠ äº‹ä»¶ç›‘å¬(æ— å‚)
     /// </summary>
-    /// <param name="name">ÊÂ¼şÃû</param>
-    /// <param name="action">ÊÂ¼şÂß¼­</param>
+    /// <param name="name">äº‹ä»¶å</param>
+    /// <param name="action">äº‹ä»¶é€»è¾‘</param>
     public void AddListener(string name, UnityAction action)
     {
-        //Èç¹û×ÖµäÖĞÓĞÕâ¸öÊÂ¼ş¼àÌı
+        //å¦‚æœå­—å…¸ä¸­æœ‰è¿™ä¸ªäº‹ä»¶ç›‘å¬
         if (eventDic.ContainsKey(name))
         {
             (eventDic[name] as EventInfo).actions += action;
         }
-        //Èç¹ûÃ»ÓĞ
+        //å¦‚æœæ²¡æœ‰
         else
         {
             eventDic.Add(name, new EventInfo(action));
@@ -81,18 +81,18 @@ public class EventCenter : Singleton<EventCenter>
 
 
     /// <summary>
-    /// ÒÆ³ıÊÂ¼ş¼àÌı(ÓĞ²Î)
+    /// ç§»é™¤äº‹ä»¶ç›‘å¬(æœ‰å‚)
     /// </summary>
-    /// <param name="name">ÊÂ¼şÃû</param>
-    /// <param name="action">ÊÂ¼şÂß¼­</param>
+    /// <param name="name">äº‹ä»¶å</param>
+    /// <param name="action">äº‹ä»¶é€»è¾‘</param>
     public void RemoveListener<T>(string name, UnityAction<T> action)
     {
-        //Èç¹û×ÖµäÖĞÓĞÕâ¸öÊÂ¼ş¼àÌı
+        //å¦‚æœå­—å…¸ä¸­æœ‰è¿™ä¸ªäº‹ä»¶ç›‘å¬
         if (eventDic.ContainsKey(name))
         {
             (eventDic[name] as EventInfo<T>).actions -= action;
         }
-        //Èç¹ûÃ»ÓĞ
+        //å¦‚æœæ²¡æœ‰
         else
         {
             Debug.Log("No Event to RemoveListener: " + name);
@@ -101,21 +101,21 @@ public class EventCenter : Singleton<EventCenter>
 
 
     /// <summary>
-    /// ÒÆ³ıÊÂ¼ş¼àÌı(ÎŞ²Î)
+    /// ç§»é™¤äº‹ä»¶ç›‘å¬(æ— å‚)
     /// </summary>
-    /// <param name="name">ÊÂ¼şÃû</param>
-    /// <param name="action">ÊÂ¼şÂß¼­</param>
+    /// <param name="name">äº‹ä»¶å</param>
+    /// <param name="action">äº‹ä»¶é€»è¾‘</param>
     public void RemoveListener(string name, UnityAction action)
     {
-        //Èç¹û×ÖµäÖĞÓĞÕâ¸öÊÂ¼ş¼àÌı
+        //å¦‚æœå­—å…¸ä¸­æœ‰è¿™ä¸ªäº‹ä»¶ç›‘å¬
         if (eventDic.ContainsKey(name))
         {
             (eventDic[name] as EventInfo).actions -= action;
-            //Èç¹ûÊÂ¼şÃ»ÓĞ¼àÌıÁË¾ÍÒÆ³ıÕâ¸öÊÂ¼ş
+            //å¦‚æœäº‹ä»¶æ²¡æœ‰ç›‘å¬äº†å°±ç§»é™¤è¿™ä¸ªäº‹ä»¶
             if((eventDic[name] as EventInfo).actions == null)
                 eventDic.Remove(name);
         }
-        //Èç¹ûÃ»ÓĞ
+        //å¦‚æœæ²¡æœ‰
         else
         {
             Debug.Log("No Event to RemoveListener: " + name);
@@ -123,23 +123,23 @@ public class EventCenter : Singleton<EventCenter>
     }
 
     /// <summary>
-    /// DebugÊä³öÊÂ¼ş¼àÌı£¬ÓÃÓÚµ÷ÊÔ¼ì²é¼àÌıÕß
+    /// Debugè¾“å‡ºäº‹ä»¶ç›‘å¬ï¼Œç”¨äºè°ƒè¯•æ£€æŸ¥ç›‘å¬è€…
     /// </summary>
-    /// <param name="name">ÊÂ¼şÃû</param>
+    /// <param name="name">äº‹ä»¶å</param>
     public void DebugEventListener(string name)
     {
-        //Èç¹û×ÖµäÖĞÓĞÕâ¸öÊÂ¼ş¼àÌı
+        //å¦‚æœå­—å…¸ä¸­æœ‰è¿™ä¸ªäº‹ä»¶ç›‘å¬
         if (eventDic.ContainsKey(name))
         {
             System.Delegate[] dels = (eventDic[name] as EventInfo).actions.GetInvocationList();
-            Debug.Log("*****¼àÌı¶ÔÏóÃÇ*****");
+            Debug.Log("*****ç›‘å¬å¯¹è±¡ä»¬*****");
             foreach (System.Delegate del in dels)
             {
-                Debug.Log("¼àÌıÕß:" + del.Target);
+                Debug.Log("ç›‘å¬è€…:" + del.Target);
             }
             Debug.Log("**********");
         }
-        //Èç¹ûÃ»ÓĞ
+        //å¦‚æœæ²¡æœ‰
         else
         {
             Debug.Log("No Event to Debug: " + name);
@@ -148,10 +148,10 @@ public class EventCenter : Singleton<EventCenter>
 
 
     /// <summary>
-    /// ¹ã²¥ÊÂ¼ş(ÓĞ²Î)
+    /// å¹¿æ’­äº‹ä»¶(æœ‰å‚)
     /// </summary>
-    /// <param name="name">ÊÂ¼şÃû</param>
-    /// <param name="obj">ÊÂ¼şµÄ²ÎÊı</param>
+    /// <param name="name">äº‹ä»¶å</param>
+    /// <param name="obj">äº‹ä»¶çš„å‚æ•°</param>
     public void PostEvent<T>(string name, T obj)
     {
         if (eventDic.ContainsKey(name))
@@ -160,9 +160,9 @@ public class EventCenter : Singleton<EventCenter>
 
 
     /// <summary>
-    /// ¹ã²¥ÊÂ¼ş(ÎŞ²Î)
+    /// å¹¿æ’­äº‹ä»¶(æ— å‚)
     /// </summary>
-    /// <param name="name">ÊÂ¼şÃû</param>
+    /// <param name="name">äº‹ä»¶å</param>
     public void PostEvent(string name)
     {
         if (eventDic.ContainsKey(name))
@@ -171,16 +171,16 @@ public class EventCenter : Singleton<EventCenter>
 
 
     /// <summary>
-    /// ÒÆ³ıÊÂ¼şµÄËùÓĞ¼àÌı
+    /// ç§»é™¤äº‹ä»¶çš„æ‰€æœ‰ç›‘å¬
     /// </summary>
-    /// <param name="name">ÊÂ¼şÃû</param>
+    /// <param name="name">äº‹ä»¶å</param>
     public void RemoveEvent(string name)
     {
         if (eventDic.ContainsKey(name))
         {
             eventDic.Remove(name);
         }
-        //Èç¹ûÃ»ÓĞ
+        //å¦‚æœæ²¡æœ‰
         else
         {
             Debug.Log("No Event to Remove: " + name);
@@ -189,7 +189,7 @@ public class EventCenter : Singleton<EventCenter>
 
 
     /// <summary>
-    /// Çå¿ÕÊÂ¼şÈİÆ÷
+    /// æ¸…ç©ºäº‹ä»¶å®¹å™¨
     /// </summary>
     public void Clear()
     {
