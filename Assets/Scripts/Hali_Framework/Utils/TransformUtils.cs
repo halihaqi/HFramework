@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class TransformTools
+public static class TransformUtils
 {
     /// <summary>
     /// 限制自定义角度的范围到欧拉角

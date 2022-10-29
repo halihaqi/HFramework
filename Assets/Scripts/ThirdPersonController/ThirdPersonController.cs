@@ -159,8 +159,8 @@ public class ThirdPersonController : MonoBehaviour
             _camTargetPitch += _inputLook.y * (isFilpPitch ? -1 : 1);
         }
         //限制相机角度
-        _camTargetYaw = TransformTools.ClampAngle(_camTargetYaw, float.MinValue, float.MaxValue);
-        _camTargetPitch = TransformTools.ClampAngle(_camTargetPitch, bottomClamp, topClamp);
+        _camTargetYaw = TransformUtils.ClampAngle(_camTargetYaw, float.MinValue, float.MaxValue);
+        _camTargetPitch = TransformUtils.ClampAngle(_camTargetPitch, bottomClamp, topClamp);
         //移动相机目标点
         followTarget.rotation = Quaternion.Euler(_camTargetPitch, _camTargetYaw, 0);
     }

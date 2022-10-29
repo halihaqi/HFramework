@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" addBOMForNewFiles="with BOM under Windows, with no BOM otherwise">
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/ApiExpand/Transform_Expand.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/ApiExpand/int_Expand.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/AudioMgr/AudioMgr.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/EventCenter/EventCenter.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/GlobalMono/GlobalMono.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/GlobalMono/MonoMgr.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/InputMgr/InputMgr.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/ObjectPool/PoolMgr.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/ResMgr/ResMgr.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/SceneMgr/LoadingPanel.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/SceneMgr/SceneMgr.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/Singleton/Singleton.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/Singleton/SingletonAutoMono.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/Singleton/SingletonMono.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/Tools/TransformTools.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/UI/BasePanel.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/Hali_Framework/UI/UIMgr.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/ThirdPersonController/ThirdPersonCam.cs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Assets/Scripts/ThirdPersonController/ThirdPersonController.cs" charset="UTF-8" />
+  </component>
+</project>
