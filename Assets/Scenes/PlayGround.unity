@@ -387,6 +387,7 @@ GameObject:
   m_Component:
   - component: {fileID: 814127442}
   - component: {fileID: 814127441}
+  - component: {fileID: 814127443}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -470,6 +471,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 53.56, y: -36.08, z: 0}
+--- !u!114 &814127443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 814127440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 683704c7fca47bb41af93115cb03b522, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -566,14 +579,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60d71ec0c1addbd42bbf36e1ca9ddd8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  followTarget: {fileID: 0}
+  followTarget: {fileID: 287814113}
   sensitive: 12
   shoulderOffset: {x: 1, y: 0, z: 0}
   camDistance: 3
   camSide: 0.6
   camCollisionFilter:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 0
   ignoreTag: Player
   camRadius: 0.15
 --- !u!1 &1315886733

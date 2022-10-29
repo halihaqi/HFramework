@@ -98,6 +98,8 @@ public class ThirdPersonCam : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
+        if(followTarget == null)
+            return;
         offset = followTarget.right * shoulderOffset.x * (camSide - 0.5f) * 2
                     + followTarget.up * shoulderOffset.y
                         + followTarget.forward * shoulderOffset.z;
