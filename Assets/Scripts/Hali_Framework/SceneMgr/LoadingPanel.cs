@@ -1,23 +1,25 @@
 using System;
-using Hali_Framework.EventCenter;
 using UnityEngine.UI;
 
-public class LoadingPanel : BasePanel
+namespace Hali_Framework
 {
-    public Slider sliderProgress;
-    private Action<int> progressEvent;
-
-    public override void ShowMe(bool isFade = true)
+    public class LoadingPanel : BasePanel
     {
-        base.ShowMe(isFade);
-        //添加进度条变化事件监听
-        progressEvent = (val) => { sliderProgress.value = (float)val / 100; };
-        EventCenter.Instance.AddListener<int>(ClientEvent.LOADING, progressEvent);
-    }
+        public Slider sliderProgress;
+        private Action<int> progressEvent;
 
-    public override void HideMe(bool isFade = true)
-    {
-        base.HideMe(isFade);
-        EventCenter.Instance.RemoveListener<int>(ClientEvent.LOADING, progressEvent);
+        public override void ShowMe(bool isFade = true)
+        {
+            base.ShowMe(isFade);
+            //添加进度条变化事件监听
+            progressEvent = (val) => { sliderProgress.value = (float)val / 100; };
+            EventCenter.Instance.AddListener<int>(ClientEvent.LOADING, progressEvent);
+        }
+
+        public override void HideMe(bool isFade = true)
+        {
+            base.HideMe(isFade);
+            EventCenter.Instance.RemoveListener<int>(ClientEvent.LOADING, progressEvent);
+        }
     }
 }

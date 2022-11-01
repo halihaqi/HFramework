@@ -1,4 +1,4 @@
-﻿namespace Hali_Framework.EventCenter
+﻿namespace Hali_Framework
 {
     public enum ClientEvent
     {
