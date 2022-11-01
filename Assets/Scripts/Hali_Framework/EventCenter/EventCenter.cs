@@ -1,199 +1,289 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
+using Hali_Framework.EventCenter;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class EventCenter : Singleton<EventCenter>
 {
-    #region 内部类和接口
-    /// <summary>
-    /// 父类空接口
-    /// </summary>
-    interface IEventInfo { }
-    /// <summary>
-    /// 有参委托
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    class EventInfo<T> : IEventInfo
+    //事件容器，不支持同种名称不同类型的事件监听
+    private readonly Dictionary<ClientEvent, Delegate> _eventDic;
+    //用于单次监听除重
+    private readonly Dictionary<ClientEvent, Delegate> _onceEventDic;
+    private static int ALL_EVENT_COUNT = 0;
+
+    public EventCenter()
     {
-        public UnityAction<T> actions;
-        public EventInfo(UnityAction<T> action)
-        {
-            actions = action;
-        }
+        _eventDic = new Dictionary<ClientEvent, Delegate>(25);
+        _onceEventDic = new Dictionary<ClientEvent, Delegate>(10);
     }
 
+    #region 单次监听(触发一次自动移除)
 
-    /// <summary>
-    /// 无参委托
-    /// </summary>
-    class EventInfo : IEventInfo
+    public void OnceListener(ClientEvent name, Action call)
     {
-        public UnityAction actions;
-        public EventInfo(UnityAction action)
+        var oriCall = call;
+        if (!_onceEventDic.TryGetValue(name, out var act))
+            _onceEventDic.Add(name, oriCall);
+        else if(act == (Delegate) oriCall)
+            return;
+        call += () =>
         {
-            actions = action;
-        }
+            RemoveListener(name, oriCall);
+            _onceEventDic.Remove(name);
+        };
+        AddListener(name, call);
     }
+    
+    public void OnceListener<T>(ClientEvent name, Action<T> call)
+    {
+        var oriCall = call;
+        if (!_onceEventDic.TryGetValue(name, out var act))
+            _onceEventDic.Add(name, oriCall);
+        else if(act == (Delegate) oriCall)
+            return;
+        call += t =>
+        {
+            RemoveListener(name, oriCall);
+            _onceEventDic.Remove(name);
+        };
+        AddListener(name, call);
+    }
+    
+    public void OnceListener<T, U>(ClientEvent name, Action<T, U> call)
+    {
+        var oriCall = call;
+        if (!_onceEventDic.TryGetValue(name, out var act))
+            _onceEventDic.Add(name, oriCall);
+        else if(act == (Delegate) oriCall)
+            return;
+        call += (t, u) =>
+        {
+            RemoveListener(name, oriCall);
+            _onceEventDic.Remove(name);
+        };
+        AddListener(name, call);
+    }
+
     #endregion
 
-    //事件容器,父类接口装子类
-    private Dictionary<string, IEventInfo> eventDic = new Dictionary<string, IEventInfo>();
+    #region 添加监听
 
-    /// <summary>
-    /// 添加事件监听(有参)
-    /// </summary>
-    /// <param name="name">事件名</param>
-    /// <param name="action">事件逻辑</param>
-    public void AddListener<T>(string name, UnityAction<T> action)
+        public void AddListener(ClientEvent name, Action call)
     {
-        //如果字典中有这个事件监听
-        if (eventDic.ContainsKey(name))
+        if (_eventDic.TryGetValue(name, out var fun))
         {
-            (eventDic[name] as EventInfo<T>).actions += action;
-        }
-        //如果没有
-        else
-        {
-            eventDic.Add(name, new EventInfo<T>(action));
-        }
-    }
-
-
-    /// <summary>
-    /// 添加事件监听(无参)
-    /// </summary>
-    /// <param name="name">事件名</param>
-    /// <param name="action">事件逻辑</param>
-    public void AddListener(string name, UnityAction action)
-    {
-        //如果字典中有这个事件监听
-        if (eventDic.ContainsKey(name))
-        {
-            (eventDic[name] as EventInfo).actions += action;
-        }
-        //如果没有
-        else
-        {
-            eventDic.Add(name, new EventInfo(action));
-        }
-    }
-
-
-    /// <summary>
-    /// 移除事件监听(有参)
-    /// </summary>
-    /// <param name="name">事件名</param>
-    /// <param name="action">事件逻辑</param>
-    public void RemoveListener<T>(string name, UnityAction<T> action)
-    {
-        //如果字典中有这个事件监听
-        if (eventDic.ContainsKey(name))
-        {
-            (eventDic[name] as EventInfo<T>).actions -= action;
-        }
-        //如果没有
-        else
-        {
-            Debug.Log("No Event to RemoveListener: " + name);
-        }
-    }
-
-
-    /// <summary>
-    /// 移除事件监听(无参)
-    /// </summary>
-    /// <param name="name">事件名</param>
-    /// <param name="action">事件逻辑</param>
-    public void RemoveListener(string name, UnityAction action)
-    {
-        //如果字典中有这个事件监听
-        if (eventDic.ContainsKey(name))
-        {
-            (eventDic[name] as EventInfo).actions -= action;
-            //如果事件没有监听了就移除这个事件
-            if((eventDic[name] as EventInfo).actions == null)
-                eventDic.Remove(name);
-        }
-        //如果没有
-        else
-        {
-            Debug.Log("No Event to RemoveListener: " + name);
-        }
-    }
-
-    /// <summary>
-    /// Debug输出事件监听，用于调试检查监听者
-    /// </summary>
-    /// <param name="name">事件名</param>
-    public void DebugEventListener(string name)
-    {
-        //如果字典中有这个事件监听
-        if (eventDic.ContainsKey(name))
-        {
-            System.Delegate[] dels = (eventDic[name] as EventInfo).actions.GetInvocationList();
-            Debug.Log("*****监听对象们*****");
-            foreach (System.Delegate del in dels)
+            if (fun is Action act)
             {
-                Debug.Log("监听者:" + del.Target);
+                var len1 = act.GetInvocationList().Length;
+                act -= call;
+                act += call;
+                var len2 = act.GetInvocationList().Length;
+                if (len2 > len1) ALL_EVENT_COUNT += 1;
+                _eventDic[name] = act;
             }
-            Debug.Log("**********");
+            else
+                throw new Exception($"try AddListener funInfo:{fun.GetMethodInfo().Name}, name:{name}");
         }
-        //如果没有
         else
         {
-            Debug.Log("No Event to Debug: " + name);
+            _eventDic.Add(name, call);
+            ALL_EVENT_COUNT += 1;
         }
     }
-
-
-    /// <summary>
-    /// 广播事件(有参)
-    /// </summary>
-    /// <param name="name">事件名</param>
-    /// <param name="obj">事件的参数</param>
-    public void PostEvent<T>(string name, T obj)
+    
+    public void AddListener<T>(ClientEvent name, Action<T> call)
     {
-        if (eventDic.ContainsKey(name))
-            (eventDic[name] as EventInfo<T>).actions.Invoke(obj);
-    }
-
-
-    /// <summary>
-    /// 广播事件(无参)
-    /// </summary>
-    /// <param name="name">事件名</param>
-    public void PostEvent(string name)
-    {
-        if (eventDic.ContainsKey(name))
-            (eventDic[name] as EventInfo).actions.Invoke();
-    }
-
-
-    /// <summary>
-    /// 移除事件的所有监听
-    /// </summary>
-    /// <param name="name">事件名</param>
-    public void RemoveEvent(string name)
-    {
-        if (eventDic.ContainsKey(name))
+        if (_eventDic.TryGetValue(name, out var fun))
         {
-            eventDic.Remove(name);
+            if (fun is Action<T> act)
+            {
+                var len1 = act.GetInvocationList().Length;
+                act -= call;
+                act += call;
+                var len2 = act.GetInvocationList().Length;
+                if (len2 > len1) ALL_EVENT_COUNT += 1;
+                _eventDic[name] = act;
+            }
+            else
+                throw new Exception($"try AddListener funInfo:{fun.GetMethodInfo().Name}, name:{name}");
         }
-        //如果没有
         else
         {
-            Debug.Log("No Event to Remove: " + name);
+            _eventDic.Add(name, call);
+            ALL_EVENT_COUNT += 1;
+        }
+    }
+    
+    public void AddListener<T, U>(ClientEvent name, Action<T, U> call)
+    {
+        if (_eventDic.TryGetValue(name, out var fun))
+        {
+            if (fun is Action<T, U> act)
+            {
+                var len1 = act.GetInvocationList().Length;
+                act -= call;
+                act += call;
+                var len2 = act.GetInvocationList().Length;
+                if (len2 > len1) ALL_EVENT_COUNT += 1;
+                _eventDic[name] = act;
+            }
+            else
+                throw new Exception($"try AddListener funInfo:{fun.GetMethodInfo().Name}, name:{name}");
+        }
+        else
+        {
+            _eventDic.Add(name, call);
+            ALL_EVENT_COUNT += 1;
         }
     }
 
+    #endregion
+
+    #region 移除监听
+
+    public void RemoveListener(ClientEvent name, Action call)
+    {
+        if (call == null) return;
+        if (!_eventDic.TryGetValue(name, out var fun)) return;
+        if (fun is Action act)
+        {
+            var len1 = act.GetInvocationList().Length;
+            act -= call;
+            if (act == null)
+            {
+                _eventDic.Remove(name);
+                ALL_EVENT_COUNT -= 1;
+            }
+            else
+            {
+                _eventDic[name] = act;
+                var len2 = act.GetInvocationList().Length;
+                if (len2 < len1) ALL_EVENT_COUNT -= 1;
+            }
+        }
+    }
+    
+    public void RemoveListener<T>(ClientEvent name, Action<T> call)
+    {
+        if (call == null) return;
+        if (!_eventDic.TryGetValue(name, out var fun)) return;
+        if (fun is Action<T> act)
+        {
+            var len1 = act.GetInvocationList().Length;
+            act -= call;
+            if (act == null)
+            {
+                _eventDic.Remove(name);
+                ALL_EVENT_COUNT -= 1;
+            }
+            else
+            {
+                _eventDic[name] = act;
+                var len2 = act.GetInvocationList().Length;
+                if (len2 < len1) ALL_EVENT_COUNT -= 1;
+            }
+        }
+    }
+    
+    public void RemoveListener<T, U>(ClientEvent name, Action<T, U> call)
+    {
+        if (call == null) return;
+        if (!_eventDic.TryGetValue(name, out var fun)) return;
+        if (fun is Action<T, U> act)
+        {
+            var len1 = act.GetInvocationList().Length;
+            act -= call;
+            if (act == null)
+            {
+                _eventDic.Remove(name);
+                ALL_EVENT_COUNT -= 1;
+            }
+            else
+            {
+                _eventDic[name] = act;
+                var len2 = act.GetInvocationList().Length;
+                if (len2 < len1) ALL_EVENT_COUNT -= 1;
+            }
+        }
+    }
+
+    #endregion
+
+    #region 触发事件
+
+    public void TriggerEvent(ClientEvent name)
+    {
+        if(!_eventDic.TryGetValue(name, out var fun)) return;
+        var list = fun.GetInvocationList();
+        for (var i = 0; i < list.Length; i++)
+        {
+            if(!(list[i] is Action act)) continue;
+            try
+            {
+                act.Invoke();
+            }
+            catch (Exception e)
+            {
+                Debug.LogErrorFormat("响应事件异常，事件名({0})\n{1}\n{2}", name, e.Message, e.StackTrace);
+            }
+        }
+    }
+    
+    public void TriggerEvent<T>(ClientEvent name, T param1)
+    {
+        if(!_eventDic.TryGetValue(name, out var fun)) return;
+        var list = fun.GetInvocationList();
+        for (var i = 0; i < list.Length; i++)
+        {
+            if(!(list[i] is Action<T> act)) continue;
+            try
+            {
+                act.Invoke(param1);
+            }
+            catch (Exception e)
+            {
+                Debug.LogErrorFormat("响应事件异常，事件名({0})\n{1}\n{2}", name, e.Message, e.StackTrace);
+            }
+        }
+    }
+    
+    public void TriggerEvent<T, U>(ClientEvent name, T param1, U param2)
+    {
+        if(!_eventDic.TryGetValue(name, out var fun)) return;
+        var list = fun.GetInvocationList();
+        for (var i = 0; i < list.Length; i++)
+        {
+            if(!(list[i] is Action<T, U> act)) continue;
+            try
+            {
+                act.Invoke(param1, param2);
+            }
+            catch (Exception e)
+            {
+                Debug.LogErrorFormat("响应事件异常，事件名({0})\n{1}\n{2}", name, e.Message, e.StackTrace);
+            }
+        }
+    }
+
+    #endregion
+    
 
     /// <summary>
-    /// 清空事件容器
+    /// 移除事件所有监听，慎用
     /// </summary>
+    /// <param name="name"></param>
+    public void RemoveEvent(ClientEvent name)
+    {
+        if (_eventDic.TryGetValue(name, out var fun))
+        {
+            ALL_EVENT_COUNT -= fun.GetInvocationList().Length;
+            _eventDic.Remove(name);
+        }
+    }
+    
     public void Clear()
     {
-        eventDic.Clear();
+        _eventDic.Clear();
     }
-
 }

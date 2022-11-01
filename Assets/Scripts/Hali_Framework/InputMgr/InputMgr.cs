@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Hali_Framework.EventCenter;
 using UnityEngine;
 
 public class InputMgr : Singleton<InputMgr>
@@ -18,11 +19,11 @@ public class InputMgr : Singleton<InputMgr>
     private void KeyCheck(KeyCode key)
     {
         if (Input.GetKeyDown(key))
-            EventCenter.Instance.PostEvent("GetKeyDown", key);
+            EventCenter.Instance.TriggerEvent(ClientEvent.GET_KEY_DOWN, key);
         if(Input.GetKeyUp(key))
-            EventCenter.Instance.PostEvent("GetKeyUp", key);
+            EventCenter.Instance.TriggerEvent(ClientEvent.GET_KEY_UP, key);
         if(Input.GetKey(key))
-            EventCenter.Instance.PostEvent("GetKey", key);
+            EventCenter.Instance.TriggerEvent(ClientEvent.GET_KEY, key);
     }
 
     /// <summary>

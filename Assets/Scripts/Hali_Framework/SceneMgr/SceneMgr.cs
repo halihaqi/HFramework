@@ -1,5 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
+using Hali_Framework.EventCenter;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -61,11 +61,10 @@ public class SceneMgr : Singleton<SceneMgr>
         while (!ao.isDone)
         {
             yield return ao.progress;
-            EventCenter.Instance.PostEvent("Loading");
         }
         //等一帧，为界面更新提供时机
         yield return null;
-        EventCenter.Instance.PostEvent("LoadComplete");
+        EventCenter.Instance.TriggerEvent(ClientEvent.LOAD_COMPLETE);
         action?.Invoke();
     }
 
@@ -86,7 +85,7 @@ public class SceneMgr : Singleton<SceneMgr>
             while (toProgress < (int)(ao.progress * 100))
             {
                 toProgress++;
-                EventCenter.Instance.PostEvent("Loading", toProgress);
+                EventCenter.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
                 yield return toProgress;
             }
         }
@@ -99,15 +98,15 @@ public class SceneMgr : Singleton<SceneMgr>
         while (!ao.isDone)
         {
             toProgress = 95;
-            EventCenter.Instance.PostEvent("Loading", toProgress);
+            EventCenter.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
             yield return toProgress;
         }
         toProgress = 100;
-        EventCenter.Instance.PostEvent("Loading", toProgress);
+        EventCenter.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
         //等一帧，为界面更新提供时机
         yield return null;
         callback?.Invoke();
         UIMgr.Instance.HidePanel(panelName);
-        EventCenter.Instance.PostEvent("LoadComplete");
+        EventCenter.Instance.TriggerEvent(ClientEvent.LOAD_COMPLETE);
     }
 }
