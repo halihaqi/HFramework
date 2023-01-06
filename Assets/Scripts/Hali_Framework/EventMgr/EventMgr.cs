@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Hali_Framework
 {
-    public class EventCenter : Singleton<EventCenter>
+    public class EventMgr : Singleton<EventMgr>
     {
         //事件容器，不支持同种名称不同类型的事件监听
         private readonly Dictionary<ClientEvent, Delegate> _eventDic;
@@ -13,7 +13,7 @@ namespace Hali_Framework
         private readonly Dictionary<ClientEvent, Delegate> _onceEventDic;
         private static int ALL_EVENT_COUNT = 0;
 
-        public EventCenter()
+        public EventMgr()
         {
             _eventDic = new Dictionary<ClientEvent, Delegate>(25);
             _onceEventDic = new Dictionary<ClientEvent, Delegate>(10);

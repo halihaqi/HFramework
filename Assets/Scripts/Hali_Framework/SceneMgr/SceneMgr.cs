@@ -15,10 +15,10 @@ namespace Hali_Framework
         {
             //切换下一个场景前，清空对象池和资源字典，释放空间
             //对象池如果不清空会导致字典中有对象但场景中被销毁
-            ResMgr.Instance.ClearResDic();
-            PoolMgr.Instance.Clear();
+            ResMgr.Instance.ClearAllRes();
+            ObjectPoolMgr.Instance.Clear();
             SceneManager.LoadScene(name);
-            EventCenter.Instance.Clear();
+            EventMgr.Instance.Clear();
         }
 
         /// <summary>
@@ -30,8 +30,8 @@ namespace Hali_Framework
         /// <param name="action">完成回调函数</param>
         public void LoadSceneAsync(string name, UnityAction callback)
         {
-            ResMgr.Instance.ClearResDic();
-            PoolMgr.Instance.Clear();
+            ResMgr.Instance.ClearAllRes();
+            ObjectPoolMgr.Instance.Clear();
             MonoMgr.Instance.StartCoroutine(AsyncLoad(name, callback));
         }
 
@@ -49,8 +49,8 @@ namespace Hali_Framework
             UIMgr.Instance.ShowPanel<T>(panelName, E_UI_Layer.System, (panel) =>
             {
                 //显示完后开始切换场景
-                ResMgr.Instance.ClearResDic();
-                PoolMgr.Instance.Clear();
+                ResMgr.Instance.ClearAllRes();
+                ObjectPoolMgr.Instance.Clear();
                 MonoMgr.Instance.StartCoroutine(AsyncLoad<T>(name, panelName, callback));
             });
         }
@@ -65,7 +65,7 @@ namespace Hali_Framework
             }
             //等一帧，为界面更新提供时机
             yield return null;
-            EventCenter.Instance.TriggerEvent(ClientEvent.LOAD_COMPLETE);
+            EventMgr.Instance.TriggerEvent(ClientEvent.LOAD_COMPLETE);
             action?.Invoke();
         }
 
@@ -86,7 +86,7 @@ namespace Hali_Framework
                 while (toProgress < (int)(ao.progress * 100))
                 {
                     toProgress++;
-                    EventCenter.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
+                    EventMgr.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
                     yield return toProgress;
                 }
             }
@@ -99,16 +99,16 @@ namespace Hali_Framework
             while (!ao.isDone)
             {
                 toProgress = 95;
-                EventCenter.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
+                EventMgr.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
                 yield return toProgress;
             }
             toProgress = 100;
-            EventCenter.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
+            EventMgr.Instance.TriggerEvent(ClientEvent.LOADING, toProgress);
             //等一帧，为界面更新提供时机
             yield return null;
             callback?.Invoke();
             UIMgr.Instance.HidePanel(panelName);
-            EventCenter.Instance.TriggerEvent(ClientEvent.LOAD_COMPLETE);
+            EventMgr.Instance.TriggerEvent(ClientEvent.LOAD_COMPLETE);
         }
     }
 }

@@ -65,10 +65,10 @@ namespace Hali_Framework
         /// <summary>
         /// 改变背景音乐大小
         /// </summary>
-        /// <param name="Volume">音量</param>
-        public void ChangeBkMusicVolume(float Volume)
+        /// <param name="volume">音量</param>
+        public void ChangeBkMusicVolume(float volume)
         {
-            _bkMusicVolume = Volume;
+            _bkMusicVolume = volume;
             if (_bkMusic != null)
                 _bkMusic.volume = _bkMusicVolume;
         }

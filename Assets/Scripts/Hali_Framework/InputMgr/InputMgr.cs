@@ -18,11 +18,11 @@ namespace Hali_Framework
         private void KeyCheck(KeyCode key)
         {
             if (Input.GetKeyDown(key))
-                EventCenter.Instance.TriggerEvent(ClientEvent.GET_KEY_DOWN, key);
+                EventMgr.Instance.TriggerEvent(ClientEvent.GET_KEY_DOWN, key);
             if(Input.GetKeyUp(key))
-                EventCenter.Instance.TriggerEvent(ClientEvent.GET_KEY_UP, key);
+                EventMgr.Instance.TriggerEvent(ClientEvent.GET_KEY_UP, key);
             if(Input.GetKey(key))
-                EventCenter.Instance.TriggerEvent(ClientEvent.GET_KEY, key);
+                EventMgr.Instance.TriggerEvent(ClientEvent.GET_KEY, key);
         }
 
         /// <summary>

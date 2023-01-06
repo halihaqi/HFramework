@@ -1,5 +1,8 @@
 ﻿namespace Hali_Framework
 {
+    /// <summary>
+    /// 事件名枚举类
+    /// </summary>
     public enum ClientEvent
     {
         //Input

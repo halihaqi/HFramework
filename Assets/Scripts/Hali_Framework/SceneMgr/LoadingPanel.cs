@@ -13,13 +13,13 @@ namespace Hali_Framework
             base.ShowMe(isFade);
             //添加进度条变化事件监听
             progressEvent = (val) => { sliderProgress.value = (float)val / 100; };
-            EventCenter.Instance.AddListener<int>(ClientEvent.LOADING, progressEvent);
+            EventMgr.Instance.AddListener<int>(ClientEvent.LOADING, progressEvent);
         }
 
         public override void HideMe(bool isFade = true)
         {
             base.HideMe(isFade);
-            EventCenter.Instance.RemoveListener<int>(ClientEvent.LOADING, progressEvent);
+            EventMgr.Instance.RemoveListener<int>(ClientEvent.LOADING, progressEvent);
         }
     }
 }

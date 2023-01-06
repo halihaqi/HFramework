@@ -8,39 +8,57 @@ namespace Hali_Framework
     public class ResMgr : Singleton<ResMgr>
     {
         //资源容器
-        //优点：避免重复加载，提升加载效率
-        //缺点：内存占用，需要在合适时机释放
-        private Dictionary<string, object> resDic = new Dictionary<string, object>();
+        //避免重复加载，需要在合适时机释放
+        private readonly Dictionary<string, Dictionary<string, object>> _resDic;
 
-        /// <summary>
-        /// 清空资源容器，释放内存
-        /// </summary>
-        public void ClearResDic()
+        public ResMgr()
         {
-            resDic.Clear();
+            _resDic = new Dictionary<string, Dictionary<string, object>>();
         }
 
         /// <summary>
-        /// 加载资源(同步)
+        /// 加载资源(同步，不缓存)
         /// </summary>
+        /// <param name="path"></param>
         /// <typeparam name="T"></typeparam>
-        /// <param name="path">资源路径</param>
         /// <returns></returns>
         public T Load<T>(string path) where T : Object
         {
-            T res = null;
-            //如果字典中有，就不用加载了
-            if (resDic.ContainsKey(path))
-                res = resDic[path] as T;
-            else
-                res = Resources.Load<T>(path);
+            T res = Resources.Load<T>(path);
             //如果是GameObject，先实例化再返回
             if (res is GameObject)
-                return GameObject.Instantiate(res);
+                return Object.Instantiate(res);
             else
                 return res;
         }
 
+        /// <summary>
+        /// 加载资源(同步，缓存)
+        /// </summary>
+        /// <param name="part"></param>
+        /// <param name="path"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T Load<T>(string part, string path) where T : Object
+        {
+            T res;
+            if(!_resDic.ContainsKey(part))
+                _resDic.Add(part, new Dictionary<string, object>());
+            if (_resDic[part].ContainsKey(path))
+                res = _resDic[part][path] as T;
+            else
+            {
+                res = Resources.Load<T>(path);
+                _resDic[part].Add(path, res);
+            }
+
+            if (res is GameObject)
+                return Object.Instantiate(res);
+            else
+                return res;
+        }
+
+        
         /// <summary>
         /// 加载资源(异步)
         /// </summary>
@@ -49,26 +67,68 @@ namespace Hali_Framework
         /// <param name="callback">回调函数</param>
         public void LoadAsync<T>(string path, UnityAction<T> callback = null) where T : Object
         {
-            MonoMgr.Instance.StartCoroutine(AsyncLoad(path, callback));
+            MonoMgr.Instance.StartCoroutine(AsyncLoadCoroutine(path, callback));
         }
 
-        IEnumerator AsyncLoad<T>(string path, UnityAction<T> callback) where T : Object
+        /// <summary>
+        /// 加载资源(异步，缓存)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="part"></param>
+        /// <param name="path">资源路径</param>
+        /// <param name="callback">回调函数</param>
+        public void LoadAsync<T>(string part, string path, UnityAction<T> callback = null) where T : Object
         {
-            T res = null;
-            //如果字典中有，就不用加载了
-            if (resDic.ContainsKey(path))
-                res = resDic[path] as T;
-            else
-            {
-                ResourceRequest rr = Resources.LoadAsync<T>(path);
-                res = rr.asset as T;
-            }
-            yield return null;
-            //如果是GameObject，先生成预制体再执行回调
+            MonoMgr.Instance.StartCoroutine(AsyncLoadCoroutine(part, path, callback));
+        }
+
+        public void ClearPartRes(string part)
+        {
+            if(_resDic != null && _resDic.ContainsKey(part))
+                _resDic[part].Clear();
+        }
+        
+        public void ClearAllRes() => _resDic.Clear();
+
+        
+        
+        #region 异步协程
+
+        private IEnumerator AsyncLoadCoroutine<T>(string path, UnityAction<T> callback) where T : Object
+        {
+            var rr = Resources.LoadAsync<T>(path);
+            while(!rr.isDone)
+                yield return rr.progress;
+            T res = rr.asset as T;
+
             if (res is GameObject)
-                callback?.Invoke(GameObject.Instantiate(res));
+                callback?.Invoke(Object.Instantiate(res));
             else
                 callback?.Invoke(res);
         }
+        
+        private IEnumerator AsyncLoadCoroutine<T>(string part, string path, UnityAction<T> callback) where T : Object
+        {
+            T res;
+            if(!_resDic.ContainsKey(part))
+                _resDic.Add(part, new Dictionary<string, object>());
+            if (_resDic[part].ContainsKey(path))
+                res = _resDic[part][path] as T;
+            else
+            {
+                var rr = Resources.LoadAsync<T>(path);
+                while(!rr.isDone)
+                    yield return rr.progress;
+                res = rr.asset as T;
+                _resDic[part].Add(path, res);
+            }
+
+            if (res is GameObject)
+                callback?.Invoke(Object.Instantiate(res));
+            else
+                callback?.Invoke(res);
+        }
+
+        #endregion
     }
 }
