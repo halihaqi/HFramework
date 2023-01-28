@@ -10,10 +10,11 @@ namespace Hali_Framework
     public abstract class BasePanel : MonoBehaviour
     {
         //UI组件容器，物体名对应物体挂载的所有UI组件
-        private Dictionary<string, List<UIBehaviour>> controlDic = new Dictionary<string, List<UIBehaviour>>();
+        private Dictionary<string, List<UIBehaviour>> _controlDic = new Dictionary<string, List<UIBehaviour>>();
+        private Dictionary<string, AnimationClip> _panelAnimDic;
 
         //面板渐变速度(0,1)
-        private float fadeSpeed = 0.1f;
+        private const float FADE_SPEED = 0.1f;
 
         protected virtual void Awake()
         {
@@ -35,42 +36,41 @@ namespace Hali_Framework
             T[] controls = this.GetComponentsInChildren<T>();
             for (int i = 0; i < controls.Length; i++)
             {
-                //组件的物体名
+                //添加组件进字典
                 string objName = controls[i].gameObject.name;
-                //如果字典包含，就添加到物体的组件List中
-                if (controlDic.ContainsKey(objName))
-                    controlDic[objName].Add(controls[i]);
-                //如果不包含，就新建一个物体的组件List并添加此组件
+
+                if (_controlDic.ContainsKey(objName))
+                    _controlDic[objName].Add(controls[i]);
                 else
-                    controlDic.Add(objName, new List<UIBehaviour>() { controls[i] });
+                    _controlDic.Add(objName, new List<UIBehaviour>() { controls[i] });
             
-                //添加事件监听
-                if(controls[i] is Button)
+                //组件添加事件监听
+                if(controls[i] is Button btn)
                 {
-                    (controls[i] as Button).onClick.AddListener(() =>
+                    btn.onClick.AddListener(() =>
                     {
                         OnClick(objName);
                     });
                 }
-                if (controls[i] is Toggle)
+                if (controls[i] is Toggle tog)
                 {
-                    (controls[i] as Toggle).onValueChanged.AddListener((isToggle) =>
+                    tog.onValueChanged.AddListener((isToggle) =>
                     {
-                        ToggleOnValueChanged(objName, isToggle);
+                        OnToggleValueChanged(objName, isToggle);
                     });
                 }
-                if (controls[i] is Slider)
+                if (controls[i] is Slider sld)
                 {
-                    (controls[i] as Slider).onValueChanged.AddListener((val) =>
+                    sld.onValueChanged.AddListener((val) =>
                     {
-                        SliderOnValueChanged(objName, val);
+                        OnSliderValueChanged(objName, val);
                     });
                 }
-                if (controls[i] is InputField)
+                if (controls[i] is InputField ifd)
                 {
-                    (controls[i] as InputField).onValueChanged.AddListener((val) =>
+                    ifd.onValueChanged.AddListener((val) =>
                     {
-                        InputFieldOnValueChanged(objName, val);
+                        OnInputFieldValueChanged(objName, val);
                     });
                 }
             }
@@ -85,12 +85,12 @@ namespace Hali_Framework
         public T GetControl<T>(string name) where T : UIBehaviour
         {
             //每个物体只会挂载一个同种类的组件，所以不会重复
-            if (controlDic.ContainsKey(name))
+            if (_controlDic.ContainsKey(name))
             {
-                for (int i = 0; i < controlDic[name].Count; i++)
+                for (int i = 0; i < _controlDic[name].Count; i++)
                 {
-                    if (controlDic[name][i] is T)
-                        return controlDic[name][i] as T;
+                    if (_controlDic[name][i] is T)
+                        return _controlDic[name][i] as T;
                 }
             }
             print(name + " No this UIControl");
@@ -102,7 +102,7 @@ namespace Hali_Framework
         /// 面板显示时调用
         /// </summary>
         /// <param name="isFade">是否开启渐变</param>
-        public virtual void ShowMe(bool isFade = true)
+        public virtual void OnShow(bool isFade = true)
         {
             if (isFade)
             {
@@ -116,7 +116,7 @@ namespace Hali_Framework
         /// 面板隐藏时调用
         /// </summary>
         /// <param name="isFade">是否开启渐变</param>
-        public virtual void HideMe(bool isFade = true)
+        public virtual void OnHide(bool isFade = true)
         {
             if (isFade)
             {
@@ -131,17 +131,17 @@ namespace Hali_Framework
 
         }
 
-        protected virtual void ToggleOnValueChanged(string togName, bool isToggle)
+        protected virtual void OnToggleValueChanged(string togName, bool isToggle)
         {
 
         }
 
-        protected virtual void SliderOnValueChanged(string sldName, float val)
+        protected virtual void OnSliderValueChanged(string sldName, float val)
         {
 
         }
 
-        protected virtual void InputFieldOnValueChanged(string inputName, string val)
+        protected virtual void OnInputFieldValueChanged(string inputName, string val)
         {
 
         }
@@ -160,7 +160,7 @@ namespace Hali_Framework
                 canvasGroup.alpha = 0;
                 while(canvasGroup.alpha < 1)
                 {
-                    canvasGroup.alpha += fadeSpeed;
+                    canvasGroup.alpha += FADE_SPEED;
                     yield return null;
                 }
             }
@@ -169,7 +169,7 @@ namespace Hali_Framework
                 canvasGroup.alpha = 1;
                 while (canvasGroup.alpha > 0)
                 {
-                    canvasGroup.alpha -= fadeSpeed;
+                    canvasGroup.alpha -= FADE_SPEED;
                     yield return null;
                 }
             }

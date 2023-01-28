@@ -8,17 +8,17 @@ namespace Hali_Framework
         public Slider sliderProgress;
         private Action<int> progressEvent;
 
-        public override void ShowMe(bool isFade = true)
+        public override void OnShow(bool isFade = true)
         {
-            base.ShowMe(isFade);
+            base.OnShow(isFade);
             //添加进度条变化事件监听
             progressEvent = (val) => { sliderProgress.value = (float)val / 100; };
             EventMgr.Instance.AddListener<int>(ClientEvent.LOADING, progressEvent);
         }
 
-        public override void HideMe(bool isFade = true)
+        public override void OnHide(bool isFade = true)
         {
-            base.HideMe(isFade);
+            base.OnHide(isFade);
             EventMgr.Instance.RemoveListener<int>(ClientEvent.LOADING, progressEvent);
         }
     }

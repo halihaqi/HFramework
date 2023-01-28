@@ -45,7 +45,7 @@ namespace Hali_Framework
         /// <typeparam name="T">面板类</typeparam>
         /// <param name="panelName">面板物体名</param>
         /// <param name="layer">面板要放的层级</param>
-        /// <param name="callback">加载完的回调,ShowMe之后</param>
+        /// <param name="callback">加载完的回调,OnShow之后</param>
         public void ShowPanel<T>(string panelName, E_UI_Layer layer = E_UI_Layer.Bot, UnityAction<T> callback = null) where T : BasePanel
         {
             if(panelDic.ContainsKey(panelName))
@@ -83,7 +83,7 @@ namespace Hali_Framework
 
                 //添加到字典容器
                 panelDic.Add(panelName, panel);
-                panelDic[panelName].ShowMe();
+                panelDic[panelName].OnShow();
 
                 //执行回调
                 callback?.Invoke(panel);
@@ -98,7 +98,7 @@ namespace Hali_Framework
         {
             if (panelDic.ContainsKey(panelName))
             {
-                panelDic[panelName].HideMe();
+                panelDic[panelName].OnHide();
                 //这里防止面板延时隐藏期间被其他脚本调用
                 panelDic[panelName].enabled = false;
                 GameObject.Destroy(panelDic[panelName].gameObject, 0.5f);

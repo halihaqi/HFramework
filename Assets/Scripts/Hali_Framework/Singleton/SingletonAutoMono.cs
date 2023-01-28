@@ -9,19 +9,19 @@ using UnityEngine;
 /// <typeparam name="T"></typeparam>
 public abstract class SinletonAutoMono<T> : MonoBehaviour where T : SinletonAutoMono<T>
 {
-    private static T instance;
+    private static T _instance;
     public static T Instance
     {
         get
         {
-            if (instance == null)
+            if (_instance == null)
             {
                 GameObject obj = new GameObject();
                 obj.name = typeof(T).Name;
-                instance = obj.AddComponent<T>();
+                _instance = obj.AddComponent<T>();
                 DontDestroyOnLoad(obj);
             }
-            return instance;
+            return _instance;
         }
     }
 

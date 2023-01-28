@@ -9,7 +9,7 @@ namespace Hali_Framework
     {
         private readonly Dictionary<string, ObjectPool> _objectPoolCollection;
         private GameObject _poolCollectionObj;
-        
+
         public ObjectPoolMgr()
             => _objectPoolCollection = new Dictionary<string, ObjectPool>();
         
@@ -20,7 +20,7 @@ namespace Hali_Framework
         /// <param name="callback"></param>
         public void PopObj(string path, Action<GameObject> callback)
         {
-            if (_objectPoolCollection.ContainsKey(path) && _objectPoolCollection[path].PoolNum > 0)
+            if (_objectPoolCollection.ContainsKey(path) && _objectPoolCollection[path].CacheNum > 0)
             {
                 GameObject obj = _objectPoolCollection[path].Pop();
                 callback?.Invoke(obj);
@@ -50,7 +50,10 @@ namespace Hali_Framework
             else
             {
                 if (_poolCollectionObj == null)
+                {
                     _poolCollectionObj = new GameObject("Pool");
+                    _poolCollectionObj.AddComponent<PoolCollectionEntity>();
+                }
                 _objectPoolCollection.Add(path, new ObjectPool(obj, _poolCollectionObj));
             }
         }

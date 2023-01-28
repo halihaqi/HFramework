@@ -8,7 +8,10 @@ namespace Hali_Framework
             private GameObject _parentObj;
             private readonly Queue<GameObject> _poolList;
             
-            public int PoolNum { get; private set; }
+            /// <summary>
+            /// 池中对象缓存数
+            /// </summary>
+            public int CacheNum { get; private set; }
 
             /// <summary>
             /// 对象池构造函数
@@ -22,13 +25,14 @@ namespace Hali_Framework
                 _poolList = new Queue<GameObject>();
                 Push(obj);
             }
-            
+
             public GameObject Pop()
             {
                 GameObject obj = _poolList.Dequeue();
                 obj.SetActive(true);
                 obj.transform.SetParent(null, false);
-                --PoolNum;
+                --CacheNum;
+                EventMgr.Instance.TriggerEvent(ClientEvent.POOL_CHANGED);
                 return obj;
             }
             
@@ -37,14 +41,16 @@ namespace Hali_Framework
                 obj.SetActive(false);
                 obj.transform.SetParent(_parentObj.transform, false);
                 _poolList.Enqueue(obj);
-                ++PoolNum;
+                ++CacheNum;
+                EventMgr.Instance.TriggerEvent(ClientEvent.POOL_CHANGED);
             }
             
             public void Clear()
             {
                 _parentObj = null;
                 _poolList.Clear();
-                PoolNum = 0;
+                CacheNum = 0;
+                EventMgr.Instance.TriggerEvent(ClientEvent.POOL_CHANGED);
             }
         }
 }

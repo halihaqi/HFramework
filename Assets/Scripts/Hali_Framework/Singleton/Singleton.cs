@@ -6,14 +6,14 @@ using System;
 /// <typeparam name="T"></typeparam>
 public abstract class Singleton<T> where T : Singleton<T>, new()
 {
-    private static T instance;
+    private static T _instance;
     public static T Instance
     {
         get
         {
-            if (instance == null)
-                instance = new T();
-            return instance;
+            if (_instance == null)
+                _instance = new T();
+            return _instance;
         }
     }
 }

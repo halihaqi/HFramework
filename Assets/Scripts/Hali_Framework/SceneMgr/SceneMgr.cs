@@ -14,7 +14,6 @@ namespace Hali_Framework
         public void LoadScene(string name)
         {
             //切换下一个场景前，清空对象池和资源字典，释放空间
-            //对象池如果不清空会导致字典中有对象但场景中被销毁
             ResMgr.Instance.ClearAllRes();
             ObjectPoolMgr.Instance.Clear();
             SceneManager.LoadScene(name);

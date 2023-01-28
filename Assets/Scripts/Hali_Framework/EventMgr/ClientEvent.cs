@@ -13,5 +13,8 @@
         //Scene
         LOADING,
         LOAD_COMPLETE,
+        
+        //Pool
+        POOL_CHANGED,
     }
 }
