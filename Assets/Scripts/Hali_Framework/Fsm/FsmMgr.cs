@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Hali_Framework
 {
-    public class FsmManager : Singleton<FsmManager>
+    public class FsmMgr : Singleton<FsmMgr>
     {
         private readonly Dictionary<string, FsmBase> _mFsms;
         private readonly List<FsmBase> _mTempFsms;
@@ -11,7 +11,7 @@ namespace Hali_Framework
         /// <summary>
         /// 初始化有限状态机管理器的新实例。
         /// </summary>
-        public FsmManager()
+        public FsmMgr()
         {
             _mFsms = new Dictionary<string, FsmBase>();
             _mTempFsms = new List<FsmBase>();

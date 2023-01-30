@@ -26,9 +26,14 @@ namespace Hali_Framework
         bool IsDestroyed { get; }
         
         /// <summary>
-        /// 当前状态持续时间
+        /// 当前状态
         /// </summary>
         FsmState<T> CurrentState { get; }
+        
+        /// <summary>
+        /// 当前状态持续时间
+        /// </summary>
+        float CurrentStateTime { get; }
 
         /// <summary>
         /// 开始有限状态机
