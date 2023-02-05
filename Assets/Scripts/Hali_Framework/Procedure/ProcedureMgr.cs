@@ -6,14 +6,18 @@ namespace Hali_Framework
     /// <summary>
     /// 游戏流程管理类
     /// </summary>
-    public class ProcedureMgr : Singleton<ProcedureMgr>
+    public class ProcedureMgr : Singleton<ProcedureMgr>, IModule
     {
-        private FsmMgr _fsmMgr;
         private IFsm<ProcedureMgr> _procedureFsm;
 
-        public ProcedureMgr()
+        public int Priority => 0;
+
+        void IModule.Update(float elapseSeconds, float realElapseSeconds)
         {
-            _fsmMgr = null;
+        }
+
+        void IModule.Dispose()
+        {
             _procedureFsm = null;
         }
 
@@ -51,18 +55,10 @@ namespace Hali_Framework
         /// <summary>
         /// 初始化流程管理器。
         /// </summary>
-        /// <param name="fsmManager">有限状态机管理器。</param>
         /// <param name="procedures">流程管理器包含的流程。</param>
-        public void Initialize(FsmMgr fsmManager, params ProcedureBase[] procedures)
+        public void Initialize(params ProcedureBase[] procedures)
         {
-            if (fsmManager == null)
-            {
-                Debug.LogError("FSM manager is invalid.");
-                return;
-            }
-
-            _fsmMgr = fsmManager;
-            _procedureFsm = _fsmMgr.CreateFsm("ProcedureFsm", this, procedures);
+            _procedureFsm = FsmMgr.Instance.CreateFsm("ProcedureFsm", this, procedures);
         }
         
         /// <summary>

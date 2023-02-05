@@ -9,9 +9,9 @@ public class TagEditor : PropertyDrawer
     {
         Tag tag = attribute as Tag;
 
-        //ÒòÎªattribute»á±»ÖØĞÂ´´½¨
-        //ËùÒÔÒªÏÈ»ñÈ¡ÊôĞÔ¹ÒÔØµÄÎïÌåµÄÖµ
-        //²¢¸³¸øtag
+        //å› ä¸ºattributeä¼šè¢«é‡æ–°åˆ›å»º
+        //æ‰€ä»¥è¦å…ˆè·å–å±æ€§æŒ‚è½½çš„ç‰©ä½“çš„å€¼
+        //å¹¶èµ‹ç»™tag
         string frontStr = (string)fieldInfo.GetValue(property.serializedObject.targetObject);
         for (int i = 0; i < InternalEditorUtility.tags.Length; i++)
         {
@@ -26,9 +26,9 @@ public class TagEditor : PropertyDrawer
         tag.Name = InternalEditorUtility.tags[tag.Selected];
         fieldInfo.SetValue(property.serializedObject.targetObject, tag.Name);
 
-        //ĞŞ¸ÄºóÖ±½ÓÍË³öunity²»»á±£´æ
-        //ÒòÎª×Ô¶¨Òå±à¼­Æ÷²»»áÈÃ³¡¾°ÖªµÀ×Ô¼ºÒÑ¾­×öÁËĞŞ¸Äµ«»¹Ã»±£´æ¡£
-        //Ò²¾ÍÊÇËµ£¬ĞèÒªÈÃ±à¼­Æ÷ÖªµÀ×Ô¼ºÒÑ¾­¡°Ôà¡±ÁË£¬²Å»áÊ¹ĞŞ¸Ä¿ÉÒÔ±»±£´æ¡£
+        //ä¿®æ”¹åç›´æ¥é€€å‡ºunityä¸ä¼šä¿å­˜
+        //å› ä¸ºè‡ªå®šä¹‰ç¼–è¾‘å™¨ä¸ä¼šè®©åœºæ™¯çŸ¥é“è‡ªå·±å·²ç»åšäº†ä¿®æ”¹ä½†è¿˜æ²¡ä¿å­˜ã€‚
+        //ä¹Ÿå°±æ˜¯è¯´ï¼Œéœ€è¦è®©ç¼–è¾‘å™¨çŸ¥é“è‡ªå·±å·²ç»â€œè„â€äº†ï¼Œæ‰ä¼šä½¿ä¿®æ”¹å¯ä»¥è¢«ä¿å­˜ã€‚
         if (GUI.changed)
         {
             EditorUtility.SetDirty(property.serializedObject.targetObject);

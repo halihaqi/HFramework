@@ -12,7 +12,7 @@ namespace Editor.Excel
     public static class ExcelUtils
     {
         //Excel文件夹
-        private static string EXCEL_PATH = $"{Application.dataPath}/Art/Excel/";
+        private static string EXCEL_PATH = $"{Application.dataPath}/Excel/";
         //Excel生成类文件夹
         private static string DATA_CLASS_PATH = $"{Application.dataPath}/Scripts/ExcelData/DataClass/";
         //Excel生成数据容器文件夹

@@ -5,18 +5,27 @@ using UnityEngine.SceneManagement;
 
 namespace Hali_Framework
 {
-    public class SceneMgr : Singleton<SceneMgr>
+    public class SceneMgr : Singleton<SceneMgr>, IModule
     {
+        public int Priority => 0;
+        void IModule.Update(float elapseSeconds, float realElapseSeconds)
+        {
+        }
+
+        void IModule.Dispose()
+        {
+        }
+        
         /// <summary>
         /// 加载场景(同步)
         /// </summary>
-        /// <param name="name">场景名</param>
-        public void LoadScene(string name)
+        /// <param name="sceneName">场景名</param>
+        public void LoadScene(string sceneName)
         {
             //切换下一个场景前，清空对象池和资源字典，释放空间
             ResMgr.Instance.ClearAllRes();
             ObjectPoolMgr.Instance.Clear();
-            SceneManager.LoadScene(name);
+            SceneManager.LoadScene(sceneName);
             EventMgr.Instance.Clear();
         }
 
@@ -25,13 +34,13 @@ namespace Hali_Framework
         /// 加载过程中会分发事件"Loading"
         /// 加载结束会分发无参事件"LoadComplete"
         /// </summary>
-        /// <param name="name">场景名</param>
-        /// <param name="action">完成回调函数</param>
-        public void LoadSceneAsync(string name, UnityAction callback)
+        /// <param name="sceneName">场景名</param>
+        /// <param name="callback">完成回调函数</param>
+        public void LoadSceneAsync(string sceneName, UnityAction callback)
         {
             ResMgr.Instance.ClearAllRes();
             ObjectPoolMgr.Instance.Clear();
-            MonoMgr.Instance.StartCoroutine(AsyncLoad(name, callback));
+            MonoMgr.Instance.StartCoroutine(AsyncLoad(sceneName, callback));
         }
 
         /// <summary>
@@ -39,18 +48,17 @@ namespace Hali_Framework
         /// 加载过程中会分发有参事件"Loading",参数为加载进度
         /// 加载结束会分发无参事件"LoadComplete"，会自动隐藏加载面板
         /// </summary>
-        /// <param name="name">场景名</param>
-        /// <param name="panelName">加载界面Panel预设体名</param>
+        /// <param name="sceneName">场景名</param>
         /// <param name="callback">加载完成的回调</param>
-        public void LoadSceneAsync<T>(string name, string panelName, UnityAction callback) where T : BasePanel
+        public void LoadSceneWithPanel<T>(string sceneName, UnityAction callback) where T : PanelBase
         {
             //先显示LoadingUI
-            UIMgr.Instance.ShowPanel<T>(panelName, E_UI_Layer.System, (panel) =>
+            UIMgr.Instance.ShowPanel<T>(GameConst.UIGROUP_BOT, callback: panel =>
             {
                 //显示完后开始切换场景
                 ResMgr.Instance.ClearAllRes();
                 ObjectPoolMgr.Instance.Clear();
-                MonoMgr.Instance.StartCoroutine(AsyncLoad<T>(name, panelName, callback));
+                MonoMgr.Instance.StartCoroutine(AsyncLoadWithPanel(sceneName, panel, callback));
             });
         }
 
@@ -69,7 +77,7 @@ namespace Hali_Framework
         }
 
         //异步加载场景协程(有UI遮挡)
-        IEnumerator AsyncLoad<T>(string name, string panelName, UnityAction callback) where T : BasePanel
+        IEnumerator AsyncLoadWithPanel(string name, PanelBase panel, UnityAction callback)
         {
             //申明toProgress表示假的加载进度
             //因为ao.progress在加载小场景时变化太快，效果不好
@@ -106,7 +114,7 @@ namespace Hali_Framework
             //等一帧，为界面更新提供时机
             yield return null;
             callback?.Invoke();
-            UIMgr.Instance.HidePanel(panelName);
+            UIMgr.Instance.HidePanel(panel);
             EventMgr.Instance.TriggerEvent(ClientEvent.LOAD_COMPLETE);
         }
     }

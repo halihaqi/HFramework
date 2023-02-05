@@ -15,5 +15,12 @@ namespace Hali_Framework
         
         //数据密钥
         public const byte KEY = 233;
+        
+        //UI
+        //UI组名
+        public const string UIGROUP_BOT = "Bottom";
+        public const string UIGROUP_MID = "Middle";
+        public const string UIGROUP_TOP = "Top";
+        public const string UIGROUP_SYS = "System";
     }
 }

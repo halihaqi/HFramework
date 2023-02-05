@@ -1,203 +1,369 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Hali_Framework
 {
-    public enum E_UI_Layer
+    public class UIMgr : Singleton<UIMgr>, IModule
     {
-        Bot,Mid,Top,System
-    }
-    public class UIMgr : Singleton<UIMgr>
-    {
-        private Dictionary<string, BasePanel> panelDic = new Dictionary<string, BasePanel>();
+        private readonly Dictionary<string, UIGroup> _uiGroups;
+        private readonly Dictionary<int, string> _loadingPanels;
+        private readonly HashSet<int> _loadingPanelsToRelease;
+        private readonly Queue<PanelEntity> _recycleQueue;
+        private int _cachedSerialId;
+        private GameObject _canvas;
+        private GameObject _eventSystem;
 
-        private RectTransform canvas;
-        public RectTransform Canvas => canvas;
+        private const string PANEL_PATH = "UI/";
 
-        private Transform bot;
-        private Transform mid;
-        private Transform top;
-        private Transform system;
+        /// <summary>
+        /// 界面组数量
+        /// </summary>
+        public int UIGroupCount => _uiGroups.Count;
+
+        public int Priority => 0;
 
         public UIMgr()
         {
-            //加载Canvas
-            GameObject obj = ResMgr.Instance.Load<GameObject>("UI/Canvas");
-            canvas = obj.transform as RectTransform;
-            GameObject.DontDestroyOnLoad(obj);
-
-            bot = canvas.Find("Bot");
-            mid = canvas.Find("Mid");
-            top = canvas.Find("Top");
-            system = canvas.Find("System");
-
-            //加载EventSystem
-            obj = ResMgr.Instance.Load<GameObject>("UI/EventSystem");
-            GameObject.DontDestroyOnLoad(obj);
+            _uiGroups = new Dictionary<string, UIGroup>();
+            _loadingPanels = new Dictionary<int, string>();
+            _loadingPanelsToRelease = new HashSet<int>();
+            _recycleQueue = new Queue<PanelEntity>();
+            _cachedSerialId = 0;
         }
 
-        /// <summary>
-        /// 显示面板(异步)
-        /// </summary>
-        /// <typeparam name="T">面板类</typeparam>
-        /// <param name="panelName">面板物体名</param>
-        /// <param name="layer">面板要放的层级</param>
-        /// <param name="callback">加载完的回调,OnShow之后</param>
-        public void ShowPanel<T>(string panelName, E_UI_Layer layer = E_UI_Layer.Bot, UnityAction<T> callback = null) where T : BasePanel
+        void IModule.Update(float elapseSeconds, float realElapseSeconds)
         {
-            if(panelDic.ContainsKey(panelName))
+            while (_recycleQueue.Count > 0)
             {
-                callback?.Invoke(panelDic[panelName] as T);
-                return;
+                PanelEntity panelEntity = _recycleQueue.Dequeue();
+                panelEntity.OnRecycle();
+                ObjectPoolMgr.Instance.PushObj(panelEntity.AssetName, panelEntity.gameObject);
             }
 
-            ResMgr.Instance.LoadAsync<GameObject>("UI/" + panelName, (obj) =>
+            foreach (var group in _uiGroups.Values)
             {
-                //判断父对象
-                Transform father = bot;
-                switch (layer)
-                {
-                    case E_UI_Layer.Mid:
-                        father = mid;
-                        break;
-                    case E_UI_Layer.Top:
-                        father = top;
-                        break;
-                    case E_UI_Layer.System:
-                        father = system;
-                        break;
-                }
-
-                //设置父对象 初始化transform
-                obj.transform.SetParent(father);
-                obj.transform.localPosition = Vector3.zero;
-                obj.transform.localScale = Vector3.one;
-                (obj.transform as RectTransform).offsetMax = Vector2.zero;
-                (obj.transform as RectTransform).offsetMin = Vector2.zero;
-
-                //获得物体挂载的panel脚本
-                T panel = obj.GetComponent<T>();
-
-                //添加到字典容器
-                panelDic.Add(panelName, panel);
-                panelDic[panelName].OnShow();
-
-                //执行回调
-                callback?.Invoke(panel);
-            });
+                group.Update(elapseSeconds, realElapseSeconds);
+            }
         }
 
-        /// <summary>
-        /// 隐藏面板,先执行HideMe
-        /// </summary>
-        /// <param name="panelName">面板名</param>
-        public void HidePanel(string panelName)
+        void IModule.Dispose()
         {
-            if (panelDic.ContainsKey(panelName))
-            {
-                panelDic[panelName].OnHide();
-                //这里防止面板延时隐藏期间被其他脚本调用
-                panelDic[panelName].enabled = false;
-                GameObject.Destroy(panelDic[panelName].gameObject, 0.5f);
-                panelDic.Remove(panelName);
-            }
-            else
-            {
-                Debug.Log("Dont Hide Panel: " + panelName);
-            }
+            _uiGroups.Clear();
+            _loadingPanels.Clear();
+            _loadingPanelsToRelease.Clear();
+            _recycleQueue.Clear();
+            _cachedSerialId = 0;
         }
 
         /// <summary>
-        /// 隐藏所有面板
+        /// 是否存在界面组
         /// </summary>
-        /// <param name="panelName">忽略的面板名</param>
-        public void HideAllPanel(params string[] panelName)
-        {
-            List<string> keyList = new List<string>();
-            //先将要忽略的key加入列表
-            foreach (string ignore in panelName)
-            {
-                keyList.Add(ignore);
-            }
-            //再循环判断字典，添加除忽略的所有面板，移除忽略的面板
-            foreach(string key in panelDic.Keys)
-            {
-                //如果字典中有忽略的key，则移除该key
-                if (keyList.Contains(key))
-                    keyList.Remove(key);
-                else
-                    keyList.Add(key);
-            }
-            //最后遍历列表隐藏
-            foreach (string key in keyList)
-            {
-                HidePanel(key);
-            }
-        }
-
-        /// <summary>
-        /// 得到面板
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="panelName">面板名</param>
+        /// <param name="groupName">组名</param>
         /// <returns></returns>
-        public T GetPanel<T>(string panelName) where T : BasePanel
+        public bool HasUIGroup(string groupName) => _uiGroups.ContainsKey(groupName);
+
+        /// <summary>
+        /// 获得界面组
+        /// </summary>
+        /// <param name="groupName">组名</param>
+        /// <returns></returns>
+        public UIGroup GetUIGroup(string groupName)
         {
-            if (panelDic.ContainsKey(panelName))
-                return panelDic[panelName] as T;
-            else
-                Debug.Log("Dont Get Panel: " + panelName);
+            return _uiGroups.TryGetValue(groupName, out var group) ? group : null;
+        }
+
+        /// <summary>
+        /// 获得所有界面组
+        /// </summary>
+        /// <returns></returns>
+        public UIGroup[] GetAllUIGroups()
+        {
+            int index = 0;
+            UIGroup[] allGroups = new UIGroup[_uiGroups.Count];
+            foreach (var group in _uiGroups.Values)
+                allGroups[index++] = group;
+            return allGroups;
+        }
+
+        /// <summary>
+        /// 添加界面组
+        /// </summary>
+        /// <param name="groupName">组名</param>
+        /// <param name="groupDepth">深度</param>
+        /// <returns></returns>
+        public bool AddUIGroup(string groupName, int groupDepth)
+        {
+            if (HasUIGroup(groupName))
+                return false;
+
+            _uiGroups.Add(groupName, new UIGroup(groupName, groupDepth));
+            InitCanvas();
+            GameObject obj = new GameObject(groupName);
+            obj.AddComponent<UIGroupEntity>().BindUIGroup(_uiGroups[groupName]);
+            obj.transform.SetParent(_canvas.transform, false);
+            return true;
+        }
+
+        /// <summary>
+        /// 是否拥有界面
+        /// </summary>
+        /// <param name="serialId"></param>
+        /// <returns></returns>
+        public bool HasPanel(int serialId)
+        {
+            foreach (var group in _uiGroups.Values)
+            {
+                if (group.HasPanel(serialId))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 获得界面
+        /// </summary>
+        /// <param name="serialId"></param>
+        /// <returns></returns>
+        public PanelEntity GetPanel(int serialId)
+        {
+            foreach (var group in _uiGroups.Values)
+            {
+                var panel = group.GetPanel(serialId);
+                if (panel != null)
+                    return panel;
+            }
+
             return null;
         }
 
         /// <summary>
-        /// 添加自定义事件监听
+        /// 获得所有已加载界面
         /// </summary>
-        /// <param name="control">控件</param>
-        /// <param name="type">事件类型</param>
-        /// <param name="callback">回调函数</param>
-        public static void AddCustomListener(UIBehaviour control, EventTriggerType type, UnityAction<BaseEventData> callback)
+        /// <returns></returns>
+        public List<PanelEntity> GetAllLoadedPanels()
         {
-            //添加EventTrigger组件
-            EventTrigger trigger = control.GetComponent<EventTrigger>();
-            if(trigger == null)
-                trigger = control.gameObject.AddComponent<EventTrigger>();
+            List<PanelEntity> panelList = new List<PanelEntity>(_uiGroups.Count);
+            foreach (var group in _uiGroups.Values)
+                panelList.AddRange(group.GetAllPanels());
 
-            //添加自定义事件监听
-            EventTrigger.Entry entry = new EventTrigger.Entry();
-            entry.eventID = type;
-            entry.callback.AddListener(callback);
-            trigger.triggers.Add(entry);
+            return panelList;
         }
 
         /// <summary>
-        /// 设置UI对象的UI层级
+        /// 界面是否正在加载
         /// </summary>
-        /// <param name="rect">UI对象的RectTransform</param>
-        /// <param name="layer">层级</param>
-        /// <param name="worldPositionStays">如果为 true，则使对象保持与之前相同的世界空间位置、旋转和缩放。</param>
-        public void SetUILayer(RectTransform rect, E_UI_Layer layer, bool worldPositionStays)
+        /// <param name="serialId"></param>
+        /// <returns></returns>
+        public bool IsPanelLoading(int serialId) => _loadingPanels.ContainsKey(serialId);
+
+        /// <summary>
+        /// 获得所有正在加载的界面
+        /// </summary>
+        /// <returns></returns>
+        public int[] GetAllLoadingPanelIds()
         {
-            Transform parent = bot;
-            switch (layer)
+            int num = 0;
+            int[] loadingIds = new int[_loadingPanels.Count];
+            foreach (var id in _loadingPanels.Keys)
+                loadingIds[num++] = id;
+
+            return loadingIds;
+        }
+
+        /// <summary>
+        /// 显示界面
+        /// </summary>
+        /// <param name="callback">回调</param>
+        /// <param name="uiGroupName">UI所在组名</param>
+        /// <param name="userData">用户数据</param>
+        /// <typeparam name="T">面板类名必须和资源名一致</typeparam>
+        /// <returns>界面id</returns>
+        public int ShowPanel<T>(string uiGroupName = GameConst.UIGROUP_BOT,
+            object userData = null, Action<PanelBase> callback = null) where T : PanelBase =>
+            ShowPanel(typeof(T).Name, uiGroupName, userData, callback);
+
+        /// <summary>
+        /// 显示界面
+        /// </summary>
+        /// <param name="assetName">UI资源名</param>
+        /// <param name="callback">回调</param>
+        /// <param name="uiGroupName">UI所在组名</param>
+        /// <param name="userData">用户数据</param>
+        /// <returns>界面id</returns>
+        /// <exception cref="Exception"></exception>
+        public int ShowPanel(string assetName, string uiGroupName = GameConst.UIGROUP_BOT, object userData = null,
+            Action<PanelBase> callback = null)
+        {
+            if (string.IsNullOrEmpty(assetName))
+                throw new Exception("Show panel failed. Asset name is invalid.");
+
+            UIGroup group = GetUIGroup(uiGroupName);
+            if (group == null)
+                throw new Exception($"Show panel failed. dont contains {uiGroupName} UIGroup.");
+
+            int id = ++_cachedSerialId;
+
+            bool isNew = false;
+            //如果需要加载，就加入加载列表
+            if (ObjectPoolMgr.Instance.GetPoolCacheNum(PANEL_PATH + assetName) <= 0)
             {
-                case E_UI_Layer.Bot:
-                    parent = bot;
-                    break;
-                case E_UI_Layer.Mid:
-                    parent = mid;
-                    break;
-                case E_UI_Layer.Top:
-                    parent = top;
-                    break;
-                case E_UI_Layer.System:
-                    parent = system;
-                    break;
+                _loadingPanels.Add(id, assetName);
+                isNew = true;
             }
-            rect.SetParent(parent, worldPositionStays);
+
+            ObjectPoolMgr.Instance.PopObj(PANEL_PATH + assetName,
+                obj =>
+                {
+                    //如果在加载途中被Shutdown，加载完直接回收
+                    if (isNew && _loadingPanelsToRelease.Contains(id))
+                    {
+                        ObjectPoolMgr.Instance.PushObj(PANEL_PATH + assetName, obj);
+                        _loadingPanelsToRelease.Remove(id);
+                        return;
+                    }
+
+                    InternalShowPanel(id, assetName, group, obj, isNew, userData, callback);
+                });
+            return id;
+        }
+
+        /// <summary>
+        /// 隐藏界面
+        /// </summary>
+        /// <param name="serialId"></param>
+        /// <param name="userData"></param>
+        public void HidePanel(int serialId, object userData = null)
+            => HidePanel(GetPanel(serialId), userData);
+
+        /// <summary>
+        /// 隐藏界面
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="userData"></param>
+        public void HidePanel(PanelBase panel, object userData = null)
+            => HidePanel(panel.PanelEntity, userData);
+
+        /// <summary>
+        /// 隐藏界面
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="userData"></param>
+        /// <exception cref="Exception"></exception>
+        public void HidePanel(PanelEntity panel, object userData = null)
+        {
+            //如果正在加载，加载完再隐藏
+            if (IsPanelLoading(panel.SerialId))
+            {
+                _loadingPanelsToRelease.Add(panel.SerialId);
+                _loadingPanels.Remove(panel.SerialId);
+                return;
+            }
+            
+            UIGroup group = panel != null ? panel.UIGroup : null;
+            if (group == null)
+                throw new Exception("UI group is invalid.");
+
+            group.RemovePanel(panel);
+            panel.OnHide(userData);
+            group.Refresh();
+            _recycleQueue.Enqueue(panel);
+        }
+
+        /// <summary>
+        /// 隐藏所有已加载界面
+        /// </summary>
+        /// <param name="userData"></param>
+        public void HideAllLoadedPanels(object userData)
+        {
+            foreach (var panel in GetAllLoadedPanels())
+            {
+                if(HasPanel(panel.SerialId))
+                    HidePanel(panel, userData);
+            }
+        }
+
+        /// <summary>
+        /// 隐藏所有正在加载界面
+        /// </summary>
+        public void HideAllLoadingPanels()
+        {
+            foreach (var id in _loadingPanels.Keys)
+                _loadingPanelsToRelease.Add(id);
+            _loadingPanels.Clear();
+        }
+
+        /// <summary>
+        /// 激活界面
+        /// </summary>
+        /// <param name="serialId"></param>
+        /// <param name="userData"></param>
+        public void RefocusPanel(int serialId, object userData = null)
+            => RefocusPanel(GetPanel(serialId), userData);
+        
+        /// <summary>
+        /// 激活界面
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="userData"></param>
+        public void RefocusPanel(PanelBase panel, object userData = null)
+            => RefocusPanel(panel.PanelEntity, userData);
+
+        /// <summary>
+        /// 激活界面
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="userData"></param>
+        /// <exception cref="Exception"></exception>
+        public void RefocusPanel(PanelEntity panel, object userData = null)
+        {
+            UIGroup group = panel != null ? panel.UIGroup : null;
+            if (group == null)
+                throw new Exception("UI group is invalid.");
+            
+            group.RefocusPanel(panel, userData);
+            group.Refresh();
+            panel.OnRefocus(userData);
+        }
+        
+
+        private void InternalShowPanel(int serialId, string assetName, UIGroup uiGroup, GameObject obj, bool isNew,
+            object userData, Action<PanelBase> callback)
+        {
+            //移除加载列表
+            if (isNew)
+                _loadingPanels.Remove(serialId);
+
+            obj.transform.SetParent(uiGroup.UIGroupEntity.transform, false);
+            if (!obj.TryGetComponent(out PanelEntity panel))
+            {
+                Debug.LogError("panel has no panel entity.");
+                return;
+            }
+
+            panel.OnInit(serialId, assetName, uiGroup, isNew, userData);
+            uiGroup.AddPanel(panel);
+            panel.OnShow(userData);
+            uiGroup.Refresh();
+            callback?.Invoke(panel.Logic);
+        }
+
+        private void InitCanvas()
+        {
+            if (_canvas == null)
+            {
+                _canvas = new GameObject("Canvas");
+                _canvas.AddComponent<CanvasEntity>();
+            }
+
+            if (_eventSystem == null)
+            {
+                _eventSystem = new GameObject("EventSystem");
+                _eventSystem.AddComponent<EventSystemEntity>();
+            }
         }
     }
 }

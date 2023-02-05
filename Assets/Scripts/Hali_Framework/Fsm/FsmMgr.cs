@@ -3,10 +3,17 @@ using UnityEngine;
 
 namespace Hali_Framework
 {
-    public class FsmMgr : Singleton<FsmMgr>
+    public class FsmMgr : Singleton<FsmMgr>, IModule
     {
         private readonly Dictionary<string, FsmBase> _mFsms;
         private readonly List<FsmBase> _mTempFsms;
+
+        /// <summary>
+        /// 获取有限状态机数量。
+        /// </summary>
+        public int Count => _mFsms.Count;
+
+        public int Priority => 0;
         
         /// <summary>
         /// 初始化有限状态机管理器的新实例。
@@ -17,10 +24,16 @@ namespace Hali_Framework
             _mTempFsms = new List<FsmBase>();
         }
         
-        /// <summary>
-        /// 获取有限状态机数量。
-        /// </summary>
-        public int Count => _mFsms.Count;
+        void IModule.Update(float elapseSeconds, float realElapseSeconds)
+        {
+            Update(elapseSeconds, realElapseSeconds);
+        }
+
+        void IModule.Dispose()
+        {
+            _mFsms.Clear();
+            _mTempFsms.Clear();
+        }
 
         internal void Update(float elapseSeconds, float realElapseSeconds)
         {
