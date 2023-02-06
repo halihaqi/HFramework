@@ -23,11 +23,10 @@ namespace Hali_Framework
             EventMgr.Instance.AddListener(ClientEvent.LOADING, progressEvent);
         }
 
-        protected internal override void OnHide(object userData)
+        protected internal override void OnHide(bool isShutdown, object userData)
         {
-            base.OnHide(userData);
+            base.OnHide(isShutdown, userData);
             EventMgr.Instance.RemoveListener<int>(ClientEvent.LOADING, progressEvent);
-            UIMgr.Instance.ShowPanel<TestPanel>();
         }
     }
 }

@@ -89,7 +89,7 @@ namespace Hali_Framework
             //需要手动设置
             while (ao.progress < 0.9f)
             {
-                //这里表示的假的进度变化，如果小于ao.progres，每帧加1
+                //这里表示的假的进度变化，如果小于ao.progress，每帧加1
                 while (toProgress < (int)(ao.progress * 100))
                 {
                     toProgress++;

@@ -40,15 +40,8 @@ namespace Hali_Framework
             {
                 ResMgr.Instance.LoadAsync<GameObject>(path, (obj) =>
                 {
-                    try
-                    {
-                        obj.name = path;
-                        callback?.Invoke(obj);
-                    }
-                    catch
-                    {
-                        
-                    }
+                    obj.name = path;
+                    callback?.Invoke(obj);
                 });
             }
         }
@@ -61,6 +54,7 @@ namespace Hali_Framework
         /// <param name="obj">物体实例</param>
         public void PushObj(string path, GameObject obj)
         {
+            Debug.Log($"Push {obj}");
             if (_objectPoolCollection.ContainsKey(path))
             {
                 _objectPoolCollection[path].Push(obj);
@@ -70,9 +64,10 @@ namespace Hali_Framework
                 if (_poolCollectionObj == null)
                 {
                     _poolCollectionObj = new GameObject("Pool");
-                    _poolCollectionObj.AddComponent<PoolCollectionEntity>();
+                    _poolCollectionObj.AddComponent<PoolCollectionEntity>().
+                        SetPoolCollection(_objectPoolCollection);
                 }
-                _objectPoolCollection.Add(path, new ObjectPool(obj, _poolCollectionObj));
+                _objectPoolCollection.Add(path, new ObjectPool(path, obj, _poolCollectionObj));
             }
         }
 

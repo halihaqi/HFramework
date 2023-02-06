@@ -13,9 +13,6 @@ namespace Example
             UIMgr.Instance.AddUIGroup(GameConst.UIGROUP_MID, 1);
             UIMgr.Instance.AddUIGroup(GameConst.UIGROUP_TOP, 2);
             UIMgr.Instance.AddUIGroup(GameConst.UIGROUP_SYS, 3);
-            
-            //Test
-            SceneMgr.Instance.LoadSceneWithPanel<LoadingPanel>("PlayGround", null);
         }
     }
 }

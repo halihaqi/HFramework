@@ -40,7 +40,7 @@ namespace Hali_Framework
             {
                 PanelEntity panelEntity = _recycleQueue.Dequeue();
                 panelEntity.OnRecycle();
-                ObjectPoolMgr.Instance.PushObj(panelEntity.AssetName, panelEntity.gameObject);
+                ObjectPoolMgr.Instance.PushObj(PANEL_PATH + panelEntity.AssetName, panelEntity.gameObject);
             }
 
             foreach (var group in _uiGroups.Values)
@@ -219,7 +219,7 @@ namespace Hali_Framework
                 obj =>
                 {
                     //如果在加载途中被Shutdown，加载完直接回收
-                    if (isNew && _loadingPanelsToRelease.Contains(id))
+                    if (_loadingPanelsToRelease.Contains(id))
                     {
                         ObjectPoolMgr.Instance.PushObj(PANEL_PATH + assetName, obj);
                         _loadingPanelsToRelease.Remove(id);
@@ -236,41 +236,60 @@ namespace Hali_Framework
         /// </summary>
         /// <param name="serialId"></param>
         /// <param name="userData"></param>
-        public void HidePanel(int serialId, object userData = null)
-            => HidePanel(GetPanel(serialId), userData);
-
-        /// <summary>
-        /// 隐藏界面
-        /// </summary>
-        /// <param name="panel"></param>
-        /// <param name="userData"></param>
-        public void HidePanel(PanelBase panel, object userData = null)
-            => HidePanel(panel.PanelEntity, userData);
-
-        /// <summary>
-        /// 隐藏界面
-        /// </summary>
-        /// <param name="panel"></param>
-        /// <param name="userData"></param>
-        /// <exception cref="Exception"></exception>
-        public void HidePanel(PanelEntity panel, object userData = null)
+        /// <param name="isShutdown"></param>
+        public void HidePanel(int serialId, object userData = null, bool isShutdown = false)
         {
             //如果正在加载，加载完再隐藏
-            if (IsPanelLoading(panel.SerialId))
+            if (IsPanelLoading(serialId))
             {
-                _loadingPanelsToRelease.Add(panel.SerialId);
-                _loadingPanels.Remove(panel.SerialId);
+                _loadingPanelsToRelease.Add(serialId);
+                _loadingPanels.Remove(serialId);
                 return;
             }
             
-            UIGroup group = panel != null ? panel.UIGroup : null;
+            HidePanel(GetPanel(serialId), userData, isShutdown);
+        }
+
+        /// <summary>
+        /// 隐藏界面
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="userData"></param>
+        /// <param name="isShutdown"></param>
+        public void HidePanel(PanelBase panel, object userData = null, bool isShutdown = false)
+            => HidePanel(panel.PanelEntity, userData, isShutdown);
+
+        /// <summary>
+        /// 隐藏界面
+        /// </summary>
+        /// <param name="panel"></param>
+        /// <param name="userData"></param>
+        /// <param name="isShutdown"></param>
+        /// <exception cref="Exception"></exception>
+        public void HidePanel(PanelEntity panel, object userData = null, bool isShutdown = false)
+        {
+            if (panel == null)
+                throw new Exception("Hide panel is null.");
+            UIGroup group = panel.UIGroup;
             if (group == null)
                 throw new Exception("UI group is invalid.");
 
             group.RemovePanel(panel);
-            panel.OnHide(userData);
-            group.Refresh();
-            _recycleQueue.Enqueue(panel);
+            panel.OnHide(isShutdown, userData);
+            
+            if (isShutdown)
+            {
+                group.Refresh();
+                _recycleQueue.Enqueue(panel);
+            }
+            else
+            {
+                panel.AddHideCompleteListener(() =>
+                {
+                    group.Refresh();
+                    _recycleQueue.Enqueue(panel);
+                });
+            }
         }
 
         /// <summary>
@@ -337,6 +356,7 @@ namespace Hali_Framework
             if (isNew)
                 _loadingPanels.Remove(serialId);
 
+            obj.name = assetName;
             obj.transform.SetParent(uiGroup.UIGroupEntity.transform, false);
             if (!obj.TryGetComponent(out PanelEntity panel))
             {

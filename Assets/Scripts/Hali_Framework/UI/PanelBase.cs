@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 namespace Hali_Framework
 {
-    [RequireComponent(typeof(CanvasGroup))]
     [RequireComponent(typeof(PanelEntity))]
     public abstract class PanelBase : MonoBehaviour
     {
@@ -80,6 +79,13 @@ namespace Hali_Framework
         }
         
         /// <summary>
+        /// 界面打开完成
+        /// </summary>
+        protected internal virtual void OnShowComplete()
+        {
+        }
+        
+        /// <summary>
         /// 界面轮询
         /// </summary>
         /// <param name="elapseSeconds">逻辑时间</param>
@@ -89,8 +95,16 @@ namespace Hali_Framework
         /// <summary>
         /// 界面关闭
         /// </summary>
+        /// <param name="isShutdown"></param>
         /// <param name="userData"></param>
-        protected internal virtual void OnHide(object userData)
+        protected internal virtual void OnHide(bool isShutdown, object userData)
+        {
+        }
+        
+        /// <summary>
+        /// 界面关闭完成
+        /// </summary>
+        protected internal virtual void OnHideComplete()
         {
             Visible = false;
             _available = false;
@@ -106,7 +120,6 @@ namespace Hali_Framework
         /// </summary>
         protected internal virtual void OnPause()
         {
-            Visible = false;
         }
         
         /// <summary>
@@ -114,7 +127,6 @@ namespace Hali_Framework
         /// </summary>
         protected internal virtual void OnResume()
         {
-            Visible = true;
         }
         
         /// <summary>
