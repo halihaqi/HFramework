@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Excel;
-using Hali_Framework;
+using HFramework;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Editor.Excel
 {
@@ -23,9 +25,11 @@ namespace Editor.Excel
         private const int READ_INDEX = 4;
         
 
-        [MenuItem("Excel/GenerateExcel")]
+        [MenuItem("Tools/Excel/GenerateExcel")]
         private static void GenerateExcelInfo()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+
             //创建或获取源文件夹
             DirectoryInfo dirInfo = Directory.CreateDirectory(EXCEL_PATH);
             FileInfo[] fileInfos = dirInfo.GetFiles();
@@ -52,6 +56,8 @@ namespace Editor.Excel
             }
             
             AssetDatabase.Refresh();
+            Debug.Log($"数据生成完成，耗时：{sw.ElapsedMilliseconds}ms");
+            sw.Stop();
         }
 
         
@@ -69,6 +75,7 @@ namespace Editor.Excel
             Directory.CreateDirectory(DATA_CLASS_PATH);
             
             StringBuilder content = new StringBuilder();
+            content.Append("[System.Serializable]\n");
             content.Append($"public class {table.TableName}\n{{\n");
             //添加变量
             for (var i = 0; i < table.Columns.Count; i++)
@@ -94,10 +101,11 @@ namespace Editor.Excel
             Directory.CreateDirectory(DATA_CONTAINER_PATH);
             
             StringBuilder content = new StringBuilder();
-            content.Append($"using System.Collections.Generic;\n");
-            content.Append($"public class {table.TableName}Container\n{{\n");
+            content.Append("using System.Collections.Generic;\n");
+            content.Append($"public class {table.TableName}Container : BaseContainer\n{{\n");
             content.Append($"   public Dictionary<{rowType[keyIndex]}, {table.TableName}> ");
             content.Append($"dataDic = new Dictionary<{rowType[keyIndex]}, {table.TableName}>();\n");
+            content.Append("    public override object GetDic() => dataDic;\n");
             content.Append("}");
             
             //创建数据容器类
@@ -125,6 +133,7 @@ namespace Editor.Excel
                 //3.存储所有数据
                 DataRow row;
                 DataRow rowType = GetVariableTypeRow(table);
+                string[] arrStr;
                 for (var i = READ_INDEX; i < table.Rows.Count; i++)
                 {
                     row = table.Rows[i];
@@ -149,6 +158,37 @@ namespace Editor.Excel
                                 fs.Write(BitConverter.GetBytes(bytes.Length), 0, GameConst.INT_SIZE);
                                 fs.Write(bytes, 0, bytes.Length);
                                 break;
+                            
+                            case "int[]":
+                                //{1,2,3,4}
+                                arrStr = row[j].ToString().TrimStart('{').TrimEnd('}').Split(',');
+                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, GameConst.INT_SIZE);
+                                for (int k = 0; k < arrStr.Length; k++)
+                                    fs.Write(BitConverter.GetBytes(int.Parse(arrStr[k])), 0, GameConst.INT_SIZE);
+                                break;
+                            case "long[]":
+                                arrStr = row[j].ToString().TrimStart('{').TrimEnd('}').Split(',');
+                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, GameConst.INT_SIZE);
+                                for (int k = 0; k < arrStr.Length; k++)
+                                    fs.Write(BitConverter.GetBytes(long.Parse(arrStr[k])), 0, GameConst.LONG_SIZE);
+                                break;
+                            case "float[]":
+                                arrStr = row[j].ToString().TrimStart('{').TrimEnd('}').Split(',');
+                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, GameConst.INT_SIZE);
+                                for (int k = 0; k < arrStr.Length; k++)
+                                    fs.Write(BitConverter.GetBytes(float.Parse(arrStr[k])), 0, GameConst.FLOAT_SIZE);
+                                break;
+                            case "string[]":
+                                arrStr = row[j].ToString().TrimStart('{').TrimEnd('}').Split(',');
+                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, GameConst.INT_SIZE);
+                                for (int k = 0; k < arrStr.Length; k++)
+                                {
+                                    bytes = Encoding.UTF8.GetBytes(arrStr[k]);
+                                    fs.Write(BitConverter.GetBytes(bytes.Length), 0, GameConst.INT_SIZE);
+                                    fs.Write(bytes, 0, bytes.Length);
+                                }
+                                break;
+                            
                         }
                     }
                 }

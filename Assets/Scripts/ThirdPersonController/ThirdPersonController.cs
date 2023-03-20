@@ -1,4 +1,4 @@
-using Hali_Framework;
+using HFramework;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -59,13 +59,13 @@ public class ThirdPersonController : MonoBehaviour
         followCamera = Camera.main;
         followCamera.GetComponent<ThirdPersonCam>().followTarget = followTarget;
         //打开输入监听
-        InputMgr.Instance.OpenOrClose(true);
+        HEntry.InputMgr.Enabled = true;
     }
 
     protected virtual void OnDestroy()
     {
         //关闭输入监听
-        InputMgr.Instance.OpenOrClose(false);
+        HEntry.InputMgr.Enabled = false;
     }
 
     protected virtual void Update()
