@@ -83,6 +83,7 @@ namespace HFramework
             KeyCheck(KeyCode.Tab);
             KeyCheck(KeyCode.Escape);
             KeyCheck(KeyCode.Space);
+            KeyCheck(KeyCode.LeftShift);
 
             MouseCheck(0);
             MouseCheck(1);
