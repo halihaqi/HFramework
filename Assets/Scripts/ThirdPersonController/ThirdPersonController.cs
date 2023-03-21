@@ -1,7 +1,5 @@
-using System;
 using HFramework;
 using UnityEngine;
-using UnityEngine.Events;
 
 [RequireComponent(typeof(CharacterController))]
 public class ThirdPersonController : MonoBehaviour
@@ -150,7 +148,7 @@ public class ThirdPersonController : MonoBehaviour
             return;
         }
         //判断是否为冲刺速度
-        float targetSpeed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : moveSpeed;
+        float targetSpeed = _isInputShift ? sprintSpeed : moveSpeed;
 
         //判断移动输入是否为0
         if (_inputMove == Vector2.zero)
@@ -176,7 +174,7 @@ public class ThirdPersonController : MonoBehaviour
 
         //移动动画
         if(_hasAnim)
-            anim.SetFloat(Speed, Input.GetKey(KeyCode.LeftShift) ? inputDir.magnitude : inputDir.magnitude / 2);
+            anim.SetFloat(Speed, _isInputShift ? inputDir.magnitude : inputDir.magnitude / 2);
     }
 
     /// <summary>
