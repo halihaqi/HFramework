@@ -68,8 +68,13 @@ namespace HFramework
         private void InputUpdate()
         {
             if (!_enabled)
+            {
+                HEntry.EventMgr.TriggerEvent(ClientEvent.GET_MOVE, Vector2.zero);
+                HEntry.EventMgr.TriggerEvent(ClientEvent.GET_LOOK, Vector2.zero);
+                HEntry.EventMgr.TriggerEvent(ClientEvent.GET_MOUSE_SCROLL, 0);
                 return;
-            
+            }
+
             KeyCheck(KeyCode.W);
             KeyCheck(KeyCode.A);
             KeyCheck(KeyCode.S);

@@ -44,6 +44,7 @@ namespace HFramework
                 _cachedNode.Value.Init();
                 _cachedNode = _cachedNode.Next;
             }
+            MonoMgr.AddUpdateListener(Update);
         }
 
         /// <summary>
