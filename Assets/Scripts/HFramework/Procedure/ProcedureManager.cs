@@ -111,5 +111,10 @@ namespace HFramework
 
             return _procedureFsm.GetState<T>();
         }
+        
+        public void ChangeState<T>() where T : ProcedureBase
+        {
+            _procedureFsm.ChangeState<T>();
+        }
     }
 }

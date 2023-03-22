@@ -37,5 +37,11 @@ namespace HFramework
         /// <typeparam name="T">要获取的流程类型。</typeparam>
         /// <returns>要获取的流程。</returns>
         ProcedureBase GetProcedure<T>() where T : ProcedureBase;
+
+        /// <summary>
+        /// 切换状态
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        void ChangeState<T>() where T : ProcedureBase;
     }
 }

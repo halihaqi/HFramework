@@ -45,6 +45,12 @@ namespace HFramework
                 _cachedNode = _cachedNode.Next;
             }
             MonoMgr.AddUpdateListener(Update);
+            
+            UIMgr.AddUIGroup(GameConst.UIGROUP_WORLD, 0);
+            UIMgr.AddUIGroup(GameConst.UIGROUP_PANEL, 1);
+            UIMgr.AddUIGroup(GameConst.UIGROUP_POP, 2);
+            UIMgr.AddUIGroup(GameConst.UIGROUP_TIP, 3);
+            UIMgr.AddUIGroup(GameConst.UIGROUP_SYS, 4);
         }
 
         /// <summary>
