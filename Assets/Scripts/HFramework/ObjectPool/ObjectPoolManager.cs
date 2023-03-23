@@ -64,8 +64,11 @@ namespace HFramework
             else
             {
                 if (_poolCollectionObj == null)
+                {
                     _poolCollectionObj = new GameObject("Pool");
-                _objectPoolCollection.Add(path, new ObjectPool(path, obj, _poolCollectionObj));
+                    _poolCollectionObj.AddComponent<ObjectPoolEntity>();
+                }
+                _objectPoolCollection.Add(path, new ObjectPool(path, _poolCollectionObj, obj));
             }
         }
 
