@@ -1,7 +1,4 @@
-namespace HFramework
+public abstract class BaseContainer
 {
-    public abstract class BaseContainer
-    {
-        public abstract object GetDic();
-    }
+    public abstract object GetDic();
 }
