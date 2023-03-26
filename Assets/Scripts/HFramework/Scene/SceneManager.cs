@@ -129,20 +129,20 @@ namespace HFramework
             }
             //等一帧，为界面更新提供时机
             yield return null;
+
+            toProgress = 100;
+            HEntry.EventMgr.TriggerEvent(ClientEvent.SCENE_LOADING, toProgress);
+            callback?.Invoke();
+            HEntry.EventMgr.TriggerEvent(ClientEvent.SCENE_LOAD_COMPLETE);
+            
             if (!isAutoHide)
             {
                 while (!_isManualCompleteLoad)
                     yield return null;
             }
-
             _isManualControlLoad = false;
             _isManualCompleteLoad = false;
-            
-            toProgress = 100;
-            HEntry.EventMgr.TriggerEvent(ClientEvent.SCENE_LOADING, toProgress);
             HEntry.UIMgr.HidePanel(panel);
-            callback?.Invoke();
-            HEntry.EventMgr.TriggerEvent(ClientEvent.SCENE_LOAD_COMPLETE);
         }
     }
 }
