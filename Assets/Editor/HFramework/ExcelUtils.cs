@@ -9,23 +9,23 @@ using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace Editor.Excel
+namespace Editor.HFramework
 {
     public static class ExcelUtils
     {
         //Excel文件夹
         private static string EXCEL_PATH = $"{Application.dataPath}/Excel/";
         //Excel生成类文件夹
-        private static string DATA_CLASS_PATH = $"{Application.dataPath}/Scripts/ExcelData/DataClass/";
+        private static string DATA_CLASS_PATH = $"{Application.dataPath}/Scripts/Generate/Data/InfoClass/";
         //Excel生成数据容器文件夹
-        private static string DATA_CONTAINER_PATH = $"{Application.dataPath}/Scripts/ExcelData/Container/";
+        private static string DATA_CONTAINER_PATH = $"{Application.dataPath}/Scripts/Generate/Data/Container/";
         //Excel生成二进制数据文件夹
         private static string DATA_BINARY_PATH = $"{Application.streamingAssetsPath}/Binary/";
         //从Excel第几行开始读数据
         private const int READ_INDEX = 4;
         
 
-        [MenuItem("Tools/Excel/GenerateExcel")]
+        [MenuItem("Tools/Excel/生成Excel数据")]
         private static void GenerateExcelInfo()
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -49,7 +49,7 @@ namespace Editor.Excel
                 
                 foreach (DataTable table in tableCollection)
                 {
-                    GenerateExcelDataClass(table);
+                    GenerateExcelInfoClass(table);
                     GenerateExcelContainer(table);
                     GenerateExcelBinary(table);
                 }
@@ -60,13 +60,24 @@ namespace Editor.Excel
             sw.Stop();
         }
 
+        [MenuItem("Tools/Excel/清空Excel数据")]
+        private static void ClearExcelInfo()
+        {
+            if (Directory.Exists($"{Application.dataPath}/Scripts/Generate/Data"))
+                Directory.Delete($"{Application.dataPath}/Scripts/Generate/Data", true);
+            if (Directory.Exists(DATA_BINARY_PATH))
+                Directory.Delete(DATA_BINARY_PATH, true);
+            AssetDatabase.Refresh();
+            Debug.Log("清空Excel数据成功");
+        }
+
         
         
         /// <summary>
         /// 根据Excel表创建数据结构类
         /// </summary>
         /// <param name="table"></param>
-        private static void GenerateExcelDataClass(DataTable table)
+        private static void GenerateExcelInfoClass(DataTable table)
         {
             DataRow rowName = GetVariableNameRow(table);
             DataRow rowType = GetVariableTypeRow(table);
@@ -75,6 +86,7 @@ namespace Editor.Excel
             Directory.CreateDirectory(DATA_CLASS_PATH);
             
             StringBuilder content = new StringBuilder();
+            content.Append("using System;\n");
             content.Append("[System.Serializable]\n");
             content.Append($"public class {table.TableName}\n{{\n");
             //添加变量
@@ -102,8 +114,8 @@ namespace Editor.Excel
             
             StringBuilder content = new StringBuilder();
             content.Append("using System.Collections.Generic;\n");
-            content.Append($"public class {table.TableName}Container : BaseContainer\n{{\n");
-            content.Append($"   public Dictionary<{rowType[keyIndex]}, {table.TableName}> ");
+            content.Append($"public class {table.TableName}Container : HContainerBase\n{{\n");
+            content.Append($"    public Dictionary<{rowType[keyIndex]}, {table.TableName}> ");
             content.Append($"dataDic = new Dictionary<{rowType[keyIndex]}, {table.TableName}>();\n");
             content.Append("    public override object GetDic() => dataDic;\n");
             content.Append("}");
@@ -124,11 +136,11 @@ namespace Editor.Excel
             using (FileStream fs = new FileStream($"{DATA_BINARY_PATH}{table.TableName}.zxy", FileMode.OpenOrCreate))
             {
                 //1.存储需要写多少行数据，用于读取数据
-                fs.Write(BitConverter.GetBytes(table.Rows.Count - READ_INDEX), 0, GameConst.INT_SIZE);
+                fs.Write(BitConverter.GetBytes(table.Rows.Count - READ_INDEX), 0, sizeof(int));
                 //2.存储主键的变量名
                 string keyName = GetVariableNameRow(table)[GetKeyIndex(table)].ToString();
                 byte[] bytes = Encoding.UTF8.GetBytes(keyName);
-                fs.Write(BitConverter.GetBytes(bytes.Length), 0, GameConst.INT_SIZE);
+                fs.Write(BitConverter.GetBytes(bytes.Length), 0, sizeof(int));
                 fs.Write(bytes, 0, bytes.Length);
                 //3.存储所有数据
                 DataRow row;
@@ -137,54 +149,77 @@ namespace Editor.Excel
                 for (var i = READ_INDEX; i < table.Rows.Count; i++)
                 {
                     row = table.Rows[i];
+                    
                     for (var j = 0; j < table.Columns.Count; j++)
                     {
                         switch (rowType[j].ToString())
                         {
                             case "int":
-                                fs.Write(BitConverter.GetBytes(int.Parse(row[j].ToString())), 0, GameConst.INT_SIZE);
+                                bytes = BitConverter.GetBytes(int.Parse(row[j].ToString()));
+                                DataUtils.EncryptData(bytes);//加密
+                                fs.Write(bytes, 0, sizeof(int));
                                 break;
                             case "long":
-                                fs.Write(BitConverter.GetBytes(long.Parse(row[j].ToString())), 0, GameConst.LONG_SIZE);
+                                bytes = BitConverter.GetBytes(long.Parse(row[j].ToString()));
+                                DataUtils.EncryptData(bytes);//加密
+                                fs.Write(bytes, 0, sizeof(long));
                                 break;
                             case "float":
-                                fs.Write(BitConverter.GetBytes(float.Parse(row[j].ToString())), 0, GameConst.FLOAT_SIZE);
+                                bytes = BitConverter.GetBytes(float.Parse(row[j].ToString()));
+                                DataUtils.EncryptData(bytes);//加密
+                                fs.Write(bytes, 0, sizeof(float));
                                 break;
                             case "bool":
-                                fs.Write(BitConverter.GetBytes(bool.Parse(row[j].ToString())), 0, GameConst.BOOL_SIZE);
+                                bytes = BitConverter.GetBytes(bool.Parse(row[j].ToString()));
+                                DataUtils.EncryptData(bytes);//加密
+                                fs.Write(bytes, 0, sizeof(bool));
                                 break;
                             case "string":
                                 bytes = Encoding.UTF8.GetBytes(row[j].ToString());
-                                fs.Write(BitConverter.GetBytes(bytes.Length), 0, GameConst.INT_SIZE);
+                                DataUtils.EncryptData(bytes);//加密
+                                fs.Write(BitConverter.GetBytes(bytes.Length), 0, sizeof(int));
                                 fs.Write(bytes, 0, bytes.Length);
                                 break;
                             
                             case "int[]":
                                 //{1,2,3,4}
                                 arrStr = row[j].ToString().TrimStart('{').TrimEnd('}').Split(',');
-                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, GameConst.INT_SIZE);
+                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, sizeof(int));
                                 for (int k = 0; k < arrStr.Length; k++)
-                                    fs.Write(BitConverter.GetBytes(int.Parse(arrStr[k])), 0, GameConst.INT_SIZE);
+                                {
+                                    bytes = BitConverter.GetBytes(int.Parse(arrStr[k]));
+                                    DataUtils.EncryptData(bytes);//加密
+                                    fs.Write(bytes, 0, sizeof(int));
+                                }
                                 break;
                             case "long[]":
                                 arrStr = row[j].ToString().TrimStart('{').TrimEnd('}').Split(',');
-                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, GameConst.INT_SIZE);
+                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, sizeof(int));
                                 for (int k = 0; k < arrStr.Length; k++)
-                                    fs.Write(BitConverter.GetBytes(long.Parse(arrStr[k])), 0, GameConst.LONG_SIZE);
+                                {
+                                    bytes = BitConverter.GetBytes(long.Parse(arrStr[k]));
+                                    DataUtils.EncryptData(bytes);//加密
+                                    fs.Write(bytes, 0, sizeof(long));
+                                }
                                 break;
                             case "float[]":
                                 arrStr = row[j].ToString().TrimStart('{').TrimEnd('}').Split(',');
-                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, GameConst.INT_SIZE);
+                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, sizeof(int));
                                 for (int k = 0; k < arrStr.Length; k++)
-                                    fs.Write(BitConverter.GetBytes(float.Parse(arrStr[k])), 0, GameConst.FLOAT_SIZE);
+                                {
+                                    bytes = BitConverter.GetBytes(float.Parse(arrStr[k]));
+                                    DataUtils.EncryptData(bytes);//加密
+                                    fs.Write(bytes, 0, sizeof(float));
+                                }
                                 break;
                             case "string[]":
                                 arrStr = row[j].ToString().TrimStart('{').TrimEnd('}').Split(',');
-                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, GameConst.INT_SIZE);
+                                fs.Write(BitConverter.GetBytes(arrStr.Length), 0, sizeof(int));
                                 for (int k = 0; k < arrStr.Length; k++)
                                 {
                                     bytes = Encoding.UTF8.GetBytes(arrStr[k]);
-                                    fs.Write(BitConverter.GetBytes(bytes.Length), 0, GameConst.INT_SIZE);
+                                    DataUtils.EncryptData(bytes);//加密
+                                    fs.Write(BitConverter.GetBytes(bytes.Length), 0, sizeof(int));
                                     fs.Write(bytes, 0, bytes.Length);
                                 }
                                 break;

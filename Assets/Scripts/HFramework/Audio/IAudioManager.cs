@@ -39,15 +39,16 @@ namespace HFramework
         /// </summary>
         /// <param name="path">音效路径</param>
         /// <param name="isLoop">是否循环播放</param>
+        /// <param name="order">音效优先级，优先级低的先被挤掉</param>
         /// <param name="callback">回调函数,获得source</param>
-        void PlaySound(string path, bool isLoop, UnityAction<AudioSource> callback = null);
+        int PlaySound(string path, bool isLoop, int order, UnityAction<AudioSource> callback = null);
 
         /// <summary>
         /// 改变单个音效大小
         /// </summary>
-        /// <param name="path">音效路径</param>
+        /// <param name="channelIndex">频道index</param>
         /// <param name="volume">音量</param>
-        void ChangeSoundVolume(string path, float volume);
+        void ChangeSoundVolume(int channelIndex, float volume);
 
         /// <summary>
         /// 改变所有音效大小
@@ -58,9 +59,9 @@ namespace HFramework
         /// <summary>
         /// 改变单个音效开关
         /// </summary>
-        /// <param name="path">路径</param>
+        /// <param name="channelIndex">频道index</param>
         /// <param name="isOn">是否开启</param>
-        void ChangeSoundOn(string path, bool isOn);
+        void ChangeSoundOn(int channelIndex, bool isOn);
 
         /// <summary>
         /// 改变所有音效开关
@@ -71,8 +72,8 @@ namespace HFramework
         /// <summary>
         /// 停止音效
         /// </summary>
-        /// <param name="path">路径</param>
-        void StopSound(string path);
+        /// <param name="channelIndex">频道index</param>
+        void StopSound(int channelIndex);
 
         /// <summary>
         /// 停止所有音效

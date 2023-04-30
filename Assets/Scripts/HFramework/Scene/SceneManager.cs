@@ -65,7 +65,7 @@ namespace HFramework
         {
             _isManualControlLoad = !isAutoHide;
             //先显示LoadingUI
-            HEntry.UIMgr.ShowPanel<T>(GameConst.UIGROUP_SYS, callback: panel =>
+            HEntry.UIMgr.ShowPanel<T>(UILayer.System, callback: panel =>
             {
                 //显示完后开始切换场景
                 HEntry.ResMgr.ClearAllRes();

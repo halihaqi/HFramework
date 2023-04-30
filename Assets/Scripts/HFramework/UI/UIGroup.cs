@@ -5,18 +5,15 @@ namespace HFramework
 {
     public class UIGroup
     {
-        private string _name;
+        private UILayer _name;
         private int _depth;
         private bool _pause;
 
         private readonly LinkedList<PanelInfo> _panelInfos;
         private LinkedListNode<PanelInfo> _cachedNode;
 
-        public UIGroup(string name, int depth)
+        public UIGroup(UILayer name, int depth)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new Exception("UI group name is invalid.");
-
             _name = name;
             _pause = false;
             _panelInfos = new LinkedList<PanelInfo>();
@@ -24,7 +21,7 @@ namespace HFramework
             _depth = depth;
         }
 
-        public string Name => _name;
+        public UILayer Name => _name;
 
         public int Depth
         {

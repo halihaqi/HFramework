@@ -46,11 +46,11 @@ namespace HFramework
             }
             MonoMgr.AddUpdateListener(Update);
             
-            UIMgr.AddUIGroup(GameConst.UIGROUP_WORLD, 0);
-            UIMgr.AddUIGroup(GameConst.UIGROUP_PANEL, 1);
-            UIMgr.AddUIGroup(GameConst.UIGROUP_POP, 2);
-            UIMgr.AddUIGroup(GameConst.UIGROUP_TIP, 3);
-            UIMgr.AddUIGroup(GameConst.UIGROUP_SYS, 4);
+            UIMgr.AddUIGroup(UILayer.World, 0);
+            UIMgr.AddUIGroup(UILayer.Panel, 1);
+            UIMgr.AddUIGroup(UILayer.Pop, 2);
+            UIMgr.AddUIGroup(UILayer.Tip, 3);
+            UIMgr.AddUIGroup(UILayer.System, 4);
         }
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace HFramework
         {
             foreach (var module in _modules)
             {
-                if (module is T)
-                    return module as T;
+                if (module is T hModule)
+                    return hModule;
             }
 
             var m = CreateModule<T>();

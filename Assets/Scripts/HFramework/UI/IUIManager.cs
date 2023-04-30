@@ -20,14 +20,14 @@ namespace HFramework
         /// </summary>
         /// <param name="groupName">组名</param>
         /// <returns></returns>
-        public bool HasUIGroup(string groupName);
+        public bool HasUIGroup(UILayer groupName);
 
         /// <summary>
         /// 获得界面组
         /// </summary>
         /// <param name="groupName">组名</param>
         /// <returns></returns>
-        public UIGroup GetUIGroup(string groupName);
+        public UIGroup GetUIGroup(UILayer groupName);
 
         /// <summary>
         /// 获得所有界面组
@@ -41,7 +41,7 @@ namespace HFramework
         /// <param name="groupName">组名</param>
         /// <param name="groupDepth">深度</param>
         /// <returns></returns>
-        public bool AddUIGroup(string groupName, int groupDepth);
+        public bool AddUIGroup(UILayer groupName, int groupDepth);
 
         #endregion
 
@@ -102,7 +102,7 @@ namespace HFramework
         /// <param name="userData">用户数据</param>
         /// <typeparam name="T">面板类名必须和资源名一致</typeparam>
         /// <returns>界面id</returns>
-        public int ShowPanel<T>(string uiGroupName = GameConst.UIGROUP_PANEL,
+        public int ShowPanel<T>(UILayer uiGroupName = UILayer.Panel,
             object userData = null, Action<PanelBase> callback = null) where T : PanelBase;
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace HFramework
         /// <param name="userData">用户数据</param>
         /// <returns>界面id</returns>
         /// <exception cref="Exception"></exception>
-        public int ShowPanel(string assetName, string uiGroupName = GameConst.UIGROUP_PANEL, object userData = null,
+        public int ShowPanel(string assetName, UILayer uiGroupName = UILayer.Panel, object userData = null,
             Action<PanelBase> callback = null);
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace HFramework
         /// </summary>
         /// <param name="groupName"></param>
         /// <param name="userData"></param>
-        public void HideUIGroupPanels(string groupName, object userData = null);
+        public void HideUIGroupPanels(UILayer groupName, object userData = null);
 
         /// <summary>
         /// 隐藏UIGroup中的所有面板
@@ -161,7 +161,7 @@ namespace HFramework
         /// </summary>
         /// <param name="curGroupName">当前UIGroup名</param>
         /// <param name="userData"></param>
-        public void HideUpperUIGroupPanels(string curGroupName, object userData = null);
+        public void HideUpperUIGroupPanels(UILayer curGroupName, object userData = null);
 
         /// <summary>
         /// 隐藏当前UIGroup上方的所有面板

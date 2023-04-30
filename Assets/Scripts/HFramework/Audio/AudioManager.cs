@@ -1,11 +1,50 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using Object = UnityEngine.Object;
 
 namespace HFramework
 {
     internal class AudioManager : HModule, IAudioManager
     {
+        private class ChannelInfo
+        {
+            private AudioSource _audioSource;
+            //优先级，优先级低的先被挤掉
+            public int order;
+            //最后一次播放开始的时间，如果优先级相同，最早播放的被挤掉
+            public float lastPlayTime;
+
+            public AudioSource AudioSource => _audioSource;
+
+            public bool IsPlaying => _audioSource.isPlaying;
+
+            public float Volume
+            {
+                get => _audioSource.volume;
+                set => _audioSource.volume = value;
+            }
+
+            public bool mute
+            {
+                get => _audioSource.mute;
+                set => _audioSource.mute = value;
+            }
+
+            public void Stop()
+            {
+                _audioSource.Stop();
+            }
+
+            public ChannelInfo(AudioSource audioSource, int order = 0)
+            {
+                this._audioSource = audioSource;
+                this.order = order;
+                lastPlayTime = -1;
+            }
+        }
+        
+        private const int MAX_SOUND_NUM = 8;
         //背景音乐
         private AudioSource _bkMusic = null;
         private float _bkMusicVolume = 1;
@@ -13,41 +52,25 @@ namespace HFramework
 
         //音效
         private GameObject _soundObj = null;
-        private Dictionary<string, AudioSource> _soundDic;
+        private List<ChannelInfo> _channels;
         private float _soundVolume = 1;
         private bool _soundOn = true;
-        
+
         internal override int Priority => 0;
         
         internal override void Init()
         {
-            _soundDic = new Dictionary<string, AudioSource>();
+            _channels = new List<ChannelInfo>(MAX_SOUND_NUM);
         }
 
         internal override void Update(float elapseSeconds, float realElapseSeconds)
         {
-            MusicUpdate();
         }
 
         internal override void Shutdown()
         {
-            _soundDic.Clear();
-            _soundDic = null;
-        }
-
-        /// <summary>
-        /// 每帧判断音效是否播放完毕
-        /// </summary>
-        private void MusicUpdate()
-        {
-            foreach (string key in _soundDic.Keys)
-            {
-                if (!_soundDic[key].isPlaying)
-                {
-                    Object.Destroy(_soundDic[key]);
-                    _soundDic.Remove(key);
-                }
-            }
+            _channels.Clear();
+            _channels = null;
         }
 
 
@@ -62,6 +85,7 @@ namespace HFramework
             if (_bkMusic == null)
             {
                 GameObject obj = new GameObject("BkMusic");
+                Object.DontDestroyOnLoad(obj);
                 _bkMusic = obj.AddComponent<AudioSource>();
             }
 
@@ -131,35 +155,75 @@ namespace HFramework
         /// </summary>
         /// <param name="path">音效路径</param>
         /// <param name="isLoop">是否循环播放</param>
+        /// <param name="order">音效优先级，优先级低的先被挤掉</param>
         /// <param name="callback">回调函数,获得source</param>
-        public void PlaySound(string path, bool isLoop, UnityAction<AudioSource> callback = null)
+        public int PlaySound(string path, bool isLoop, int order = 0, UnityAction<AudioSource> callback = null)
         {
             //如果场景中没有就新建Sound空物体
-            if(_soundObj == null)
+            if (_soundObj == null)
+            {
                 _soundObj = new GameObject("Sound");
+                Object.DontDestroyOnLoad(_soundObj);
+                for (int i = 0; i < MAX_SOUND_NUM; i++)
+                {
+                    var audioSource = _soundObj.AddComponent<AudioSource>();
+                    _channels.Add(new ChannelInfo(audioSource, order));
+                }
+            }
+
+            int index = GetEmptyChannelIndex();
+            _channels[index].lastPlayTime = Time.time;
             //异步加载音效，加载完成后播放并加入soundList
             HEntry.ResMgr.LoadAsync<AudioClip>(path, (clip) =>
             {
-                AudioSource source = _soundObj.AddComponent<AudioSource>();
-                source.clip = clip;
-                source.volume = _soundVolume;
-                source.mute = !_soundOn;
-                source.loop = isLoop;
-                source.Play();
-                _soundDic.Add(path, source);
-                callback?.Invoke(source);
+                AudioSource audio = _channels[index].AudioSource;
+                audio.clip = clip;
+                audio.volume = _soundVolume;
+                audio.mute = !_soundOn;
+                audio.loop = isLoop;
+                audio.Play();
+                callback?.Invoke(audio);
             });
+            return index;
+        }
+
+        private int GetEmptyChannelIndex()
+        {
+            int lowestOrder = int.MaxValue;
+            int occupyIndex = 0;
+            for (int i = 0; i < _channels.Count; i++)
+            {
+                if (!_channels[i].IsPlaying)
+                    return i;
+                if (_channels[i].order < lowestOrder)//比较优先级
+                {
+                    lowestOrder = _channels[i].order;
+                    occupyIndex = i;
+                }
+                else if (_channels[i].order == lowestOrder &&
+                         _channels[i].lastPlayTime < _channels[occupyIndex].lastPlayTime) //比较播放时间
+                {
+                    occupyIndex = i;
+                }
+            }
+            
+            return occupyIndex;//返回挤掉的index
         }
 
         /// <summary>
         /// 改变单个音效大小
         /// </summary>
-        /// <param name="path">音效路径</param>
+        /// <param name="channelIndex">频道index</param>
         /// <param name="volume">音量</param>
-        public void ChangeSoundVolume(string path, float volume)
+        public void ChangeSoundVolume(int channelIndex, float volume)
         {
-            if (_soundDic.ContainsKey(path))
-                _soundDic[path].volume = volume;
+            if (channelIndex < 0 || channelIndex >= MAX_SOUND_NUM)
+            {
+                Debug.Log("Invalid channel index.");
+                return;
+            }
+
+            _channels[channelIndex].Volume = volume;
         }
 
         /// <summary>
@@ -169,21 +233,26 @@ namespace HFramework
         public void ChangeAllSoundVolume(float volume)
         {
             _soundVolume = volume;
-            foreach (string key in _soundDic.Keys)
+            foreach (var channel in _channels)
             {
-                _soundDic[key].volume = volume;
+                channel.Volume = volume;
             }
         }
 
         /// <summary>
         /// 改变单个音效开关
         /// </summary>
-        /// <param name="path">路径</param>
+        /// <param name="channelIndex">频道index</param>
         /// <param name="isOn">是否开启</param>
-        public void ChangeSoundOn(string path, bool isOn)
+        public void ChangeSoundOn(int channelIndex, bool isOn)
         {
-            if (_soundDic.ContainsKey(path))
-                _soundDic[path].mute = !isOn;
+            if (channelIndex < 0 || channelIndex >= MAX_SOUND_NUM)
+            {
+                Debug.Log("Invalid channel index.");
+                return;
+            }
+
+            _channels[channelIndex].mute = !isOn;
         }
 
         /// <summary>
@@ -193,26 +262,25 @@ namespace HFramework
         public void ChangeAllSoundOn(bool isOn)
         {
             _soundOn = isOn;
-            foreach (string key in _soundDic.Keys)
+            foreach (var channel in _channels)
             {
-                _soundDic[key].mute = !isOn;
+                channel.mute = !isOn;
             }
         }
 
         /// <summary>
         /// 停止音效
         /// </summary>
-        /// <param name="path">路径</param>
-        public void StopSound(string path)
+        /// <param name="channelIndex">频道index</param>
+        public void StopSound(int channelIndex)
         {
-            if (!_soundDic.ContainsKey(path))
+            if (channelIndex < 0 || channelIndex >= MAX_SOUND_NUM)
             {
-                Debug.Log("No Sound in Scene");
+                Debug.Log("Invalid channel index.");
                 return;
             }
-            _soundDic[path].Stop();
-            Object.Destroy(_soundDic[path]);
-            _soundDic.Remove(path);
+
+            _channels[channelIndex].Stop();
         }
 
         /// <summary>
@@ -220,12 +288,10 @@ namespace HFramework
         /// </summary>
         public void StopAllSound()
         {
-            foreach (string key in _soundDic.Keys)
+            foreach (var channel in _channels)
             {
-                _soundDic[key].Stop();
-                Object.Destroy(_soundDic[key]);
+                channel.Stop();
             }
-            _soundDic.Clear();
         }
 
         #endregion

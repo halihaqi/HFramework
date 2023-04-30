@@ -52,6 +52,6 @@ namespace HFramework
         /// <typeparam name="TKey">info主键类</typeparam>
         /// <typeparam name="TVal">info类</typeparam>
         /// <returns>info</returns>
-        TVal GetInfo<T, TKey, TVal>(TKey index) where T : BaseContainer;
+        TVal GetInfo<T, TKey, TVal>(TKey index) where T : HContainerBase;
     }
 }

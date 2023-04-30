@@ -1,6 +1,6 @@
 namespace HFramework
 {
-    public static class int_Expand
+    public static class IntExpand
     {
         /// <summary>
         /// 将int转换为time格式字符串 00:00:00
@@ -24,7 +24,7 @@ namespace HFramework
         /// </summary>
         /// <param name="i"></param>
         /// <returns></returns>
-        public static string ToXNum(this int i) => $"x{i}";
+        public static string ToxNum(this int i) => $"x{i}";
 
         public static string ToLv(this int i) => $"Lv.{i}";
     }

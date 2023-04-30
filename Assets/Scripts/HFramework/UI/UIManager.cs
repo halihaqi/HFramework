@@ -9,7 +9,7 @@ namespace HFramework
 {
     internal class UIManager : HModule, IUIManager
     {
-        private Dictionary<string, UIGroup> _uiGroups;
+        private Dictionary<UILayer, UIGroup> _uiGroups;
         private Dictionary<int, string> _loadingPanels;
         private List<int> _hidingPanels;
         private HashSet<int> _loadingPanelsToRelease;
@@ -33,7 +33,7 @@ namespace HFramework
 
         internal override void Init()
         {
-            _uiGroups = new Dictionary<string, UIGroup>();
+            _uiGroups = new Dictionary<UILayer, UIGroup>();
             _loadingPanels = new Dictionary<int, string>();
             _hidingPanels = new List<int>();
             _loadingPanelsToRelease = new HashSet<int>();
@@ -83,14 +83,14 @@ namespace HFramework
         /// </summary>
         /// <param name="groupName">组名</param>
         /// <returns></returns>
-        public bool HasUIGroup(string groupName) => _uiGroups.ContainsKey(groupName);
+        public bool HasUIGroup(UILayer groupName) => _uiGroups.ContainsKey(groupName);
 
         /// <summary>
         /// 获得界面组
         /// </summary>
         /// <param name="groupName">组名</param>
         /// <returns></returns>
-        public UIGroup GetUIGroup(string groupName)
+        public UIGroup GetUIGroup(UILayer groupName)
         {
             return _uiGroups.TryGetValue(groupName, out var group) ? group : null;
         }
@@ -114,14 +114,14 @@ namespace HFramework
         /// <param name="groupName">组名</param>
         /// <param name="groupDepth">深度</param>
         /// <returns></returns>
-        public bool AddUIGroup(string groupName, int groupDepth)
+        public bool AddUIGroup(UILayer groupName, int groupDepth)
         {
             if (HasUIGroup(groupName))
                 return false;
 
             _uiGroups.Add(groupName, new UIGroup(groupName, groupDepth));
             InitCanvas();
-            GameObject obj = new GameObject(groupName);
+            GameObject obj = new GameObject(groupName.ToString());
             obj.AddComponent<UIGroupEntity>().BindUIGroup(_uiGroups[groupName]);
             obj.transform.SetParent(_canvas.transform, false);
             return true;
@@ -230,7 +230,7 @@ namespace HFramework
         /// <param name="userData">用户数据</param>
         /// <typeparam name="T">面板类名必须和资源名一致</typeparam>
         /// <returns>界面id</returns>
-        public int ShowPanel<T>(string uiGroupName = GameConst.UIGROUP_PANEL,
+        public int ShowPanel<T>(UILayer uiGroupName = UILayer.Panel,
             object userData = null, Action<PanelBase> callback = null) where T : PanelBase =>
             ShowPanel(typeof(T).Name, uiGroupName, userData, callback);
 
@@ -243,7 +243,7 @@ namespace HFramework
         /// <param name="userData">用户数据</param>
         /// <returns>界面id</returns>
         /// <exception cref="Exception"></exception>
-        public int ShowPanel(string assetName, string uiGroupName = GameConst.UIGROUP_PANEL, object userData = null,
+        public int ShowPanel(string assetName, UILayer uiGroupName = UILayer.Panel, object userData = null,
             Action<PanelBase> callback = null)
         {
             if (string.IsNullOrEmpty(assetName))
@@ -345,7 +345,7 @@ namespace HFramework
         /// </summary>
         /// <param name="groupName"></param>
         /// <param name="userData"></param>
-        public void HideUIGroupPanels(string groupName, object userData = null)
+        public void HideUIGroupPanels(UILayer groupName, object userData = null)
         {
             var panels = GetUIGroup(groupName).GetAllPanels();
             foreach (var panel in panels)
@@ -369,7 +369,7 @@ namespace HFramework
         /// </summary>
         /// <param name="curGroupName">当前UIGroup名</param>
         /// <param name="userData"></param>
-        public void HideUpperUIGroupPanels(string curGroupName, object userData = null)
+        public void HideUpperUIGroupPanels(UILayer curGroupName, object userData = null)
         {
             int curDepth = GetUIGroup(curGroupName).Depth;
             var groups = GetAllUIGroups();

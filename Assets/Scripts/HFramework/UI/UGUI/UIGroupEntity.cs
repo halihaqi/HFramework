@@ -7,7 +7,7 @@ namespace HFramework
     {
         private UIGroup _uiGroup;
 
-        public string Name => _uiGroup.Name;
+        public UILayer Name => _uiGroup.Name;
 
         public int Depth => _uiGroup.Depth;
 

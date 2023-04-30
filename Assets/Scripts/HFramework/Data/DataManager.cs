@@ -10,6 +10,9 @@ namespace HFramework
 {
     internal class DataManager : HModule, IDataManager
     {
+        //路径
+        private static readonly string DATA_BINARY_PATH = $"{Application.streamingAssetsPath}/Binary/";//Excel生成二进制数据文件夹
+        
         //Excel二进制数据容器，键为数据容器名
         private Dictionary<string, object> _dataDic;
 
@@ -49,17 +52,52 @@ namespace HFramework
             }
         }
 
+        public void CustomSave(string part, string name, HDataBase data)
+        {
+            string parentFile = $"{Application.persistentDataPath}/{part}";
+            string path = $"{parentFile}/{name}.zxy";
+
+            if (!Directory.Exists(parentFile))
+                Directory.CreateDirectory(parentFile);
+            
+            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
+            {
+                fs.Write(data.Serialize(), 0, data.GetBytesCount());
+                fs.Flush();
+                fs.Close();
+            }
+        }
+
         public T Load<T>(string part, string name) where T : new()
         {
             string path = $"{Application.persistentDataPath}/{part}/{name}.zxy";
             if (!File.Exists(path))
-                return new T();
+                return default;
 
             T obj;
             using (FileStream fs = new FileStream(path, FileMode.Open))
             {
                 BinaryFormatter bf = new BinaryFormatter();
                 obj = (T)bf.Deserialize(fs);
+                fs.Close();
+            }
+
+            return obj;
+        }
+
+        public T CustomLoad<T>(string part, string name) where T : HDataBase, new()
+        {
+            string path = $"{Application.persistentDataPath}/{part}/{name}.zxy";
+            if (!File.Exists(path))
+                return default;
+
+            T obj = new T();
+            using (FileStream fs = new FileStream(path, FileMode.Open))
+            {
+                int len = obj.GetBytesCount();
+                byte[] data = new byte[len];
+                fs.Read(data, 0, len);
+                obj.Deserialize(data);
                 fs.Close();
             }
 
@@ -93,9 +131,9 @@ namespace HFramework
         private void InitTableData()
         {
             _dataDic.Clear();
-            if (!Directory.Exists(GameConst.DATA_BINARY_PATH))
-                Directory.CreateDirectory(GameConst.DATA_BINARY_PATH);
-            FileInfo[] fileInfos = new DirectoryInfo(GameConst.DATA_BINARY_PATH).GetFiles();
+            if (!Directory.Exists(DATA_BINARY_PATH))
+                Directory.CreateDirectory(DATA_BINARY_PATH);
+            FileInfo[] fileInfos = new DirectoryInfo(DATA_BINARY_PATH).GetFiles();
             foreach (FileInfo fileInfo in fileInfos)
             {
                 if(fileInfo.Extension != ".zxy")
@@ -123,7 +161,7 @@ namespace HFramework
         
             //1.读取二进制数据
             byte[] bytes;
-            using (FileStream fs = File.Open($"{GameConst.DATA_BINARY_PATH}{classType.Name}.zxy", FileMode.Open, FileAccess.Read))
+            using (FileStream fs = File.Open($"{DATA_BINARY_PATH}{classType.Name}.zxy", FileMode.Open, FileAccess.Read))
             {
                 bytes = new byte[fs.Length];
                 fs.Read(bytes, 0, bytes.Length);
@@ -133,11 +171,11 @@ namespace HFramework
         
             //2.读取数据行数
             int count = BitConverter.ToInt32(bytes, index);
-            index += GameConst.INT_SIZE;
+            index += sizeof(int);
             
             //3.读取主键名
             int keyNameLength = BitConverter.ToInt32(bytes, index);
-            index += GameConst.INT_SIZE;
+            index += sizeof(int);
             string keyName = Encoding.UTF8.GetString(bytes, index, keyNameLength);
             index += keyNameLength;
             
@@ -154,28 +192,33 @@ namespace HFramework
                 {
                     if (info.FieldType == typeof(int))
                     {
+                        DataUtils.DecryptData(bytes, index, sizeof(int));//解密
                         info.SetValue(dataObj, BitConverter.ToInt32(bytes, index));
-                        index += GameConst.INT_SIZE;
+                        index += sizeof(int);
                     }
                     else if (info.FieldType == typeof(long))
                     {
+                        DataUtils.DecryptData(bytes, index, sizeof(long));//解密
                         info.SetValue(dataObj, BitConverter.ToInt64(bytes, index));
-                        index += GameConst.LONG_SIZE;
+                        index += sizeof(long);
                     }
                     else if (info.FieldType == typeof(float))
                     {
+                        DataUtils.DecryptData(bytes, index, sizeof(float));//解密
                         info.SetValue(dataObj, BitConverter.ToSingle(bytes, index));
-                        index += GameConst.FLOAT_SIZE;
+                        index += sizeof(float);
                     }
                     else if (info.FieldType == typeof(bool))
                     {
+                        DataUtils.DecryptData(bytes, index, sizeof(bool));//解密
                         info.SetValue(dataObj, BitConverter.ToBoolean(bytes, index));
-                        index += GameConst.BOOL_SIZE;
+                        index += sizeof(bool);
                     }
                     else if (info.FieldType == typeof(string))
                     {
                         int len = BitConverter.ToInt32(bytes, index);
-                        index += GameConst.INT_SIZE;
+                        index += sizeof(int);
+                        DataUtils.DecryptData(bytes, index, len);//解密
                         info.SetValue(dataObj, Encoding.UTF8.GetString(bytes, index, len));
                         index += len;
                     }
@@ -186,48 +229,52 @@ namespace HFramework
                         if (info.FieldType == typeof(int[]))
                         {
                             arrLength = BitConverter.ToInt32(bytes, index);
-                            index += GameConst.INT_SIZE;
+                            index += sizeof(int);
                             int[] arrInt = new int[arrLength];
                             for (int j = 0; j < arrLength; j++)
                             {
+                                DataUtils.DecryptData(bytes, index, sizeof(int));//解密
                                 arrInt[j] = BitConverter.ToInt32(bytes, index);
-                                index += GameConst.INT_SIZE;
+                                index += sizeof(int);
                             }
                             info.SetValue(dataObj, arrInt);
                         }
                         else if (info.FieldType == typeof(long[]))
                         {
                             arrLength = BitConverter.ToInt32(bytes, index);
-                            index += GameConst.INT_SIZE;
+                            index += sizeof(int);
                             long[] arrLong = new long[arrLength];
                             for (int j = 0; j < arrLength; j++)
                             {
+                                DataUtils.DecryptData(bytes, index, sizeof(long));//解密
                                 arrLong[j] = BitConverter.ToInt64(bytes, index);
-                                index += GameConst.LONG_SIZE;
+                                index += sizeof(long);
                             }
                             info.SetValue(dataObj, arrLong);
                         }
                         else if (info.FieldType == typeof(float[]))
                         {
                             arrLength = BitConverter.ToInt32(bytes, index);
-                            index += GameConst.INT_SIZE;
+                            index += sizeof(int);
                             float[] arrFloat = new float[arrLength];
                             for (int j = 0; j < arrLength; j++)
                             {
+                                DataUtils.DecryptData(bytes, index, sizeof(float));//解密
                                 arrFloat[j] = BitConverter.ToSingle(bytes, index);
-                                index += GameConst.FLOAT_SIZE;
+                                index += sizeof(float);
                             }
                             info.SetValue(dataObj, arrFloat);
                         }
                         else if (info.FieldType == typeof(string[]))
                         {
                             arrLength = BitConverter.ToInt32(bytes, index);
-                            index += GameConst.INT_SIZE;
+                            index += sizeof(int);
                             string[] arrStr = new string[arrLength];
                             for (int j = 0; j < arrLength; j++)
                             {
                                 int len = BitConverter.ToInt32(bytes, index);
-                                index += GameConst.INT_SIZE;
+                                index += sizeof(int);
+                                DataUtils.DecryptData(bytes, index, len);//解密
                                 arrStr[j] = Encoding.UTF8.GetString(bytes, index, len);
                                 index += len;
                             }
@@ -266,14 +313,14 @@ namespace HFramework
         /// <param name="index">item主键</param>
         /// <typeparam name="T">容器名</typeparam>
         /// <typeparam name="TKey">item主键类</typeparam>
-        /// <typeparam name="TVal">item类</typeparam>
+        /// <typeparam name="TInfo">item类</typeparam>
         /// <returns></returns>
-        public TVal GetInfo<T, TKey, TVal>(TKey index) where T : BaseContainer
+        public TInfo GetInfo<T, TKey, TInfo>(TKey index) where T : HContainerBase
         {
-            Dictionary<TKey,TVal> dic = GetTable<T>().GetDic() as Dictionary<TKey, TVal>;
+            Dictionary<TKey,TInfo> dic = GetTable<T>().GetDic() as Dictionary<TKey, TInfo>;
             
             if (dic == null) return default;
-            if (dic.TryGetValue(index, out TVal val))
+            if (dic.TryGetValue(index, out TInfo val))
                 return val;
             return default;
         }
