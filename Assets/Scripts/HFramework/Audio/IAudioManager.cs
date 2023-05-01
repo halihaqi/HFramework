@@ -41,7 +41,7 @@ namespace HFramework
         /// <param name="isLoop">是否循环播放</param>
         /// <param name="order">音效优先级，优先级低的先被挤掉</param>
         /// <param name="callback">回调函数,获得source</param>
-        int PlaySound(string path, bool isLoop, int order, UnityAction<AudioSource> callback = null);
+        int PlaySound(string path, bool isLoop, int order = 0, UnityAction<AudioSource> callback = null);
 
         /// <summary>
         /// 改变单个音效大小
@@ -79,5 +79,11 @@ namespace HFramework
         /// 停止所有音效
         /// </summary>
         void StopAllSound();
+
+        /// <summary>
+        /// 获得音效空闲频道数
+        /// </summary>
+        /// <returns></returns>
+        int GetEmptyChannelCount();
     }
 }

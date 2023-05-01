@@ -7,7 +7,7 @@ namespace HFramework
 {
     internal class AudioManager : HModule, IAudioManager
     {
-        private class ChannelInfo
+        public class ChannelInfo
         {
             private AudioSource _audioSource;
             //优先级，优先级低的先被挤掉
@@ -25,7 +25,7 @@ namespace HFramework
                 set => _audioSource.volume = value;
             }
 
-            public bool mute
+            public bool Mute
             {
                 get => _audioSource.mute;
                 set => _audioSource.mute = value;
@@ -51,7 +51,7 @@ namespace HFramework
         private bool _bkMusicOn = true;
 
         //音效
-        private GameObject _soundObj = null;
+        private SoundMaster _soundMaster = null;//管理AudioSource实体
         private List<ChannelInfo> _channels;
         private float _soundVolume = 1;
         private bool _soundOn = true;
@@ -160,19 +160,17 @@ namespace HFramework
         public int PlaySound(string path, bool isLoop, int order = 0, UnityAction<AudioSource> callback = null)
         {
             //如果场景中没有就新建Sound空物体
-            if (_soundObj == null)
+            if (_soundMaster == null)
             {
-                _soundObj = new GameObject("Sound");
-                Object.DontDestroyOnLoad(_soundObj);
-                for (int i = 0; i < MAX_SOUND_NUM; i++)
-                {
-                    var audioSource = _soundObj.AddComponent<AudioSource>();
-                    _channels.Add(new ChannelInfo(audioSource, order));
-                }
+                _soundMaster = new GameObject().AddComponent<SoundMaster>();
+                _soundMaster.Init(MAX_SOUND_NUM);
+                foreach (var source in _soundMaster.AudioList)
+                    _channels.Add(new ChannelInfo(source));
             }
 
             int index = GetEmptyChannelIndex();
             _channels[index].lastPlayTime = Time.time;
+            _channels[index].order = order;
             //异步加载音效，加载完成后播放并加入soundList
             HEntry.ResMgr.LoadAsync<AudioClip>(path, (clip) =>
             {
@@ -185,6 +183,18 @@ namespace HFramework
                 callback?.Invoke(audio);
             });
             return index;
+        }
+
+        public int GetEmptyChannelCount()
+        {
+            int count = 0;
+            for (int i = 0; i < _channels.Count; i++)
+            {
+                if (!_channels[i].IsPlaying)
+                    count++;
+            }
+
+            return count;
         }
 
         private int GetEmptyChannelIndex()
@@ -252,7 +262,7 @@ namespace HFramework
                 return;
             }
 
-            _channels[channelIndex].mute = !isOn;
+            _channels[channelIndex].Mute = !isOn;
         }
 
         /// <summary>
@@ -264,7 +274,7 @@ namespace HFramework
             _soundOn = isOn;
             foreach (var channel in _channels)
             {
-                channel.mute = !isOn;
+                channel.Mute = !isOn;
             }
         }
 
