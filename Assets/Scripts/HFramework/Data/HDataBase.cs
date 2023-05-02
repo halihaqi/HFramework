@@ -70,7 +70,6 @@ public abstract class HDataBase
     protected void WriteInfo(byte[] bytes, HDataBase value, ref int index)
     {
         byte[] data = value.Serialize();
-        WriteInfo(bytes, data.Length, ref index);
         data.CopyTo(bytes, index);
         index += data.Length;
     }
@@ -125,6 +124,7 @@ public abstract class HDataBase
     {
         int len = ReadInt(bytes, ref index);
         var val = Encoding.UTF8.GetString(bytes, index, len);
+        index += len;
         return val;
     }
     
