@@ -20,7 +20,6 @@ namespace Examples
         {
             var thirdCam = cam.gameObject.AddComponent<ThirdPersonCam>();
             player.AddComponent<ThirdPersonController>().BindCamera(cam, thirdCam);
-            HEntry.AudioMgr.PlaySound("Audio/Background", false);
         }
     }
 }

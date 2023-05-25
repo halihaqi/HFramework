@@ -7,18 +7,27 @@ namespace HFramework
 {
     internal class EventManager : HModule, IEventManager
     {
+        private class OnceEventInfo
+        {
+            public Dictionary<Delegate, Delegate> dels;
+
+            public OnceEventInfo()
+            {
+                dels = new Dictionary<Delegate, Delegate>();
+            }
+        }
         //事件容器，不支持同种名称不同类型的事件监听
         private Dictionary<ClientEvent, Delegate> _eventDic;
         //用于单次监听除重
-        private Dictionary<ClientEvent, Delegate> _onceEventDic;
+        private Dictionary<ClientEvent, OnceEventInfo> _onceEventDic;
         private static int ALL_EVENT_COUNT = 0;
         
         internal override int Priority => 7;
 
         internal override void Init()
         {
-            _eventDic = new Dictionary<ClientEvent, Delegate>(25);
-            _onceEventDic = new Dictionary<ClientEvent, Delegate>(10);
+            _eventDic = new Dictionary<ClientEvent, Delegate>();
+            _onceEventDic = new Dictionary<ClientEvent, OnceEventInfo>();
         }
 
         internal override void Update(float elapseSeconds, float realElapseSeconds)
@@ -37,77 +46,157 @@ namespace HFramework
 
         public void OnceListener(ClientEvent name, Action call)
         {
+            //非法添加
+            if(_eventDic.ContainsKey(name) && !(_eventDic[name] is Action))
+                throw new Exception($"try AddListener funInfo:{call.GetMethodInfo().Name}, name:{name}");
+            
             var oriCall = call;
-            if (!_onceEventDic.TryGetValue(name, out var act))
-                _onceEventDic.Add(name, oriCall);
-            else if(act == (Delegate) oriCall)
-                return;
-            call += () =>
+            call += OnceRemoveFun;
+
+            if (!_onceEventDic.TryGetValue(name, out var info))
             {
-                RemoveListener(name, oriCall);
-                _onceEventDic.Remove(name);
-            };
+                info = new OnceEventInfo();
+                _onceEventDic.Add(name, info);
+            }
+            else if(info.dels.ContainsKey(oriCall))//去重
+                return;
+
+            info.dels.Add(oriCall, call);
             AddListener(name, call);
+
+            //内部方法
+            void OnceRemoveFun()
+            {
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.ContainsKey(oriCall))
+                {
+                    RemoveListener(name, oriCall);
+                }
+            }
         }
     
         public void OnceListener<T>(ClientEvent name, Action<T> call)
         {
+            //非法添加
+            if(_eventDic.ContainsKey(name) && !(_eventDic[name] is Action<T>))
+                throw new Exception($"try AddListener funInfo:{call.GetMethodInfo().Name}, name:{name}");
+            
             var oriCall = call;
-            if (!_onceEventDic.TryGetValue(name, out var act))
-                _onceEventDic.Add(name, oriCall);
-            else if(act == (Delegate) oriCall)
-                return;
-            call += t =>
+            call += OnceRemoveFun;
+
+            if (!_onceEventDic.TryGetValue(name, out var info))
             {
-                RemoveListener(name, oriCall);
-                _onceEventDic.Remove(name);
-            };
+                info = new OnceEventInfo();
+                _onceEventDic.Add(name, info);
+            }
+            else if(info.dels.ContainsKey(oriCall))//去重
+                return;
+
+            info.dels.Add(oriCall, call);
             AddListener(name, call);
+
+            //内部方法
+            void OnceRemoveFun(T t)
+            {
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.ContainsKey(oriCall))
+                {
+                    RemoveListener(name, oriCall);
+                }
+            }
         }
     
         public void OnceListener<T, U>(ClientEvent name, Action<T, U> call)
         {
+            //非法添加
+            if(_eventDic.ContainsKey(name) && !(_eventDic[name] is Action<T, U>))
+                throw new Exception($"try AddListener funInfo:{call.GetMethodInfo().Name}, name:{name}");
+            
             var oriCall = call;
-            if (!_onceEventDic.TryGetValue(name, out var act))
-                _onceEventDic.Add(name, oriCall);
-            else if(act == (Delegate) oriCall)
-                return;
-            call += (t, u) =>
+            call += OnceRemoveFun;
+
+            if (!_onceEventDic.TryGetValue(name, out var info))
             {
-                RemoveListener(name, oriCall);
-                _onceEventDic.Remove(name);
-            };
+                info = new OnceEventInfo();
+                _onceEventDic.Add(name, info);
+            }
+            else if(info.dels.ContainsKey(oriCall))//去重
+                return;
+
+            info.dels.Add(oriCall, call);
             AddListener(name, call);
+
+            //内部方法
+            void OnceRemoveFun(T t, U u)
+            {
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.ContainsKey(oriCall))
+                {
+                    RemoveListener(name, oriCall);
+                }
+            }
         }
         
         public void OnceListener<T, U, V>(ClientEvent name, Action<T, U, V> call)
         {
+            //非法添加
+            if(_eventDic.ContainsKey(name) && !(_eventDic[name] is Action<T, U, V>))
+                throw new Exception($"try AddListener funInfo:{call.GetMethodInfo().Name}, name:{name}");
+            
             var oriCall = call;
-            if (!_onceEventDic.TryGetValue(name, out var act))
-                _onceEventDic.Add(name, oriCall);
-            else if(act == (Delegate) oriCall)
-                return;
-            call += (t, u, v) =>
+            call += OnceRemoveFun;
+
+            if (!_onceEventDic.TryGetValue(name, out var info))
             {
-                RemoveListener(name, oriCall);
-                _onceEventDic.Remove(name);
-            };
+                info = new OnceEventInfo();
+                _onceEventDic.Add(name, info);
+            }
+            else if(info.dels.ContainsKey(oriCall))//去重
+                return;
+
+            info.dels.Add(oriCall, call);
             AddListener(name, call);
+
+            //内部方法
+            void OnceRemoveFun(T t, U u, V v)
+            {
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.ContainsKey(oriCall))
+                {
+                    RemoveListener(name, oriCall);
+                }
+            }
         }
         
         public void OnceListener<T, U, V, W>(ClientEvent name, Action<T, U, V, W> call)
         {
+            //非法添加
+            if(_eventDic.ContainsKey(name) && !(_eventDic[name] is Action<T, U, V, W>))
+                throw new Exception($"try AddListener funInfo:{call.GetMethodInfo().Name}, name:{name}");
+            
             var oriCall = call;
-            if (!_onceEventDic.TryGetValue(name, out var act))
-                _onceEventDic.Add(name, oriCall);
-            else if(act == (Delegate) oriCall)
-                return;
-            call += (t, u, v, w) =>
+            call += OnceRemoveFun;
+
+            if (!_onceEventDic.TryGetValue(name, out var info))
             {
-                RemoveListener(name, oriCall);
-                _onceEventDic.Remove(name);
-            };
+                info = new OnceEventInfo();
+                _onceEventDic.Add(name, info);
+            }
+            else if(info.dels.ContainsKey(oriCall))//去重
+                return;
+
+            info.dels.Add(oriCall, call);
             AddListener(name, call);
+
+            //内部方法
+            void OnceRemoveFun(T t, U u, V v, W w)
+            {
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.ContainsKey(oriCall))
+                {
+                    RemoveListener(name, oriCall);
+                }
+            }
         }
 
         #endregion
@@ -252,6 +341,16 @@ namespace HFramework
                     var len2 = act.GetInvocationList().Length;
                     if (len2 < len1) ALL_EVENT_COUNT -= 1;
                 }
+
+                //如果Once里面有，移出Once里的和Event中Once多添加的
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.TryGetValue(call, out var removeFun))
+                {
+                    _onceEventDic[name].dels.Remove(call);
+                    if (_onceEventDic[name].dels.Count == 0)
+                        _onceEventDic.Remove(name);
+                    RemoveListener(name, (Action)removeFun);
+                }
             }
         }
     
@@ -273,6 +372,16 @@ namespace HFramework
                     _eventDic[name] = act;
                     var len2 = act.GetInvocationList().Length;
                     if (len2 < len1) ALL_EVENT_COUNT -= 1;
+                }
+                
+                //如果Once里面有，移出Once里的和Event中Once多添加的
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.TryGetValue(call, out var removeFun))
+                {
+                    _onceEventDic[name].dels.Remove(call);
+                    if (_onceEventDic[name].dels.Count == 0)
+                        _onceEventDic.Remove(name);
+                    RemoveListener(name, (Action<T>)removeFun);
                 }
             }
         }
@@ -296,6 +405,16 @@ namespace HFramework
                     var len2 = act.GetInvocationList().Length;
                     if (len2 < len1) ALL_EVENT_COUNT -= 1;
                 }
+                
+                //如果Once里面有，移出Once里的和Event中Once多添加的
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.TryGetValue(call, out var removeFun))
+                {
+                    _onceEventDic[name].dels.Remove(call);
+                    if (_onceEventDic[name].dels.Count == 0)
+                        _onceEventDic.Remove(name);
+                    RemoveListener(name, (Action<T, U>)removeFun);
+                }
             }
         }
         
@@ -318,6 +437,16 @@ namespace HFramework
                     var len2 = act.GetInvocationList().Length;
                     if (len2 < len1) ALL_EVENT_COUNT -= 1;
                 }
+                
+                //如果Once里面有，移出Once里的和Event中Once多添加的
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.TryGetValue(call, out var removeFun))
+                {
+                    _onceEventDic[name].dels.Remove(call);
+                    if (_onceEventDic[name].dels.Count == 0)
+                        _onceEventDic.Remove(name);
+                    RemoveListener(name, (Action<T, U, V>)removeFun);
+                }
             }
         }
         
@@ -339,6 +468,16 @@ namespace HFramework
                     _eventDic[name] = act;
                     var len2 = act.GetInvocationList().Length;
                     if (len2 < len1) ALL_EVENT_COUNT -= 1;
+                }
+                
+                //如果Once里面有，移出Once里的和Event中Once多添加的
+                if (_onceEventDic.ContainsKey(name) && 
+                    _onceEventDic[name].dels.TryGetValue(call, out var removeFun))
+                {
+                    _onceEventDic[name].dels.Remove(call);
+                    if (_onceEventDic[name].dels.Count == 0)
+                        _onceEventDic.Remove(name);
+                    RemoveListener(name, (Action<T, U, V, W>)removeFun);
                 }
             }
         }
@@ -450,12 +589,14 @@ namespace HFramework
             {
                 ALL_EVENT_COUNT -= fun.GetInvocationList().Length;
                 _eventDic.Remove(name);
+                _onceEventDic.Remove(name);
             }
         }
     
         public void Clear()
         {
             _eventDic.Clear();
+            _onceEventDic.Clear();
         }
     }
 }
